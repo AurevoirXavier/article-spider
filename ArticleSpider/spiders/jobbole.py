@@ -9,7 +9,7 @@ class JobboleSpider(scrapy.Spider):
     start_urls = ['http://blog.jobbole.com/']
 
     def parse(self, response):
-        post_urls = response.css('.floated-thumb .post-thumb a::attr(href)').extract()
+        post_urls = response.css('#archive .floated-thumb .post-thumb a::attr(href)').extract()
         for post_url in post_urls:
             print(post_url)
 
