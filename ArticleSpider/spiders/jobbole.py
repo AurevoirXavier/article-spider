@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import re
+from scrapy.http import Request
+from urllib import parse
 
 
 class JobboleSpider(scrapy.Spider):
@@ -11,8 +13,9 @@ class JobboleSpider(scrapy.Spider):
     def parse(self, response):
         post_urls = response.css('#archive .floated-thumb .post-thumb a::attr(href)').extract()
         for post_url in post_urls:
-            print(post_url)
+            yield Request(url=parse.urljoin(response.url, post_url), callback=self.parse_detail)
 
+    def parse_detail(self, response):
         title = response.css('.entry-header h1::text').extract_first("")
         post_date = re.sub(
             r'[ \r\n·]', '',
