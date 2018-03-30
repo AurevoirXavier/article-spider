@@ -9,26 +9,26 @@ class JobboleSpider(scrapy.Spider):
     start_urls = ['http://blog.jobbole.com/110287/']
 
     def parse(self, response):
-        title = response.css('.entry-header h1::text').extract()[0]
+        title = response.css('.entry-header h1::text').extract_first("")
         post_date = re.sub(
             r'[ \r\n·]', '',
-            response.css('.entry-meta-hide-on-mobile::text').extract()[0]
+            response.css('.entry-meta-hide-on-mobile::text').extract_first("")
         )
         tag = ','.join(list(filter(
             lambda s: not s.rstrip().endswith('评论'),
-            response.css('//p[@class="entry-meta-hide-on-mobile"]/a/text()').extract()
+            response.css('.entry-meta-hide-on-mobile a::text').extract()
         )))
-        content = response.xpath('//div[@class="entry"]').extract()[0]
-        vote_num = int(response.css('.vote-post-up h10::text').extract()[0])
+        content = response.css('.entry').extract_first("")
+        vote_num = int(response.css('.vote-post-up h10::text').extract_first(""))
 
-        fav_num = response.css('.bookmark-btn::text').extract()[0]
-        match_re = re.match(r'.*?(\d+).*', fav_num)
+        bookmark_num = response.css('.bookmark-btn::text').extract_first("")
+        match_re = re.match(r'.*?(\d+).*', bookmark_num)
         if match_re:
-            fav_num = match_re.group(1)
+            bookmark_num = match_re.group(1)
 
-        comment_num = response.xpath('//a[@href="#article-comment"]/text()').extract()[0]
-        match_re = re.match(r'.*(\d+).*', comment_num)
+        comment_num = response.css('a[href="#article-comment"] span::text').extract_first("")
+        match_re = re.match(r'.*?(\d+).*', comment_num)
         if match_re:
-            fav_num = match_re.group(1)
+            comment_num = match_re.group(1)
 
         pass
