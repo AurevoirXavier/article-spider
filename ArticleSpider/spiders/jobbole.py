@@ -6,6 +6,12 @@ from scrapy.http import Request
 from urllib import parse
 from ArticleSpider.items import JobboleArticleItem
 from ArticleSpider.util.common import md5_encode
+from scrapy.loader import ItemLoader
+
+
+class ArticlespiderPipeline(object):
+    def process_item(self, item, spider):
+        return item
 
 
 class JobboleSpider(scrapy.Spider):

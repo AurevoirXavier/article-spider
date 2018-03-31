@@ -65,8 +65,9 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'ArticleSpider.pipelines.JsonExporterPipeline': 2,
-    'ArticleSpider.pipelines.ArticleImgPipeline': 1,
+    'ArticleSpider.pipelines.PostgreSQLTwistedPipeline': 1,
+    # 'ArticleSpider.pipelines.ArticleImgPipeline': 1,
+    # 'ArticleSpider.pipelines.JsonExporterPipeline': 2,
 }
 
 IMAGES_URLS_FIELD = 'front_img_url'
@@ -93,3 +94,9 @@ IMAGES_STORE = os.path.join(project_dir, 'img')
 # HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+POSTGRESQL_HOST = 'arch-linux'
+POSTGRESQL_PORT = '5432'
+POSTGRESQL_USER = 'aurevoirxavier'
+POSTGRESQL_PASSWORD = ''
+POSTGRESQL_DATABASE = 'jobbole_spider'
