@@ -4,6 +4,7 @@ import re
 from scrapy.http import Request
 from urllib import parse
 from ArticleSpider.items import JobboleArticleItem
+from ArticleSpider.util.common import md5_encode
 
 
 class JobboleSpider(scrapy.Spider):
@@ -59,6 +60,7 @@ class JobboleSpider(scrapy.Spider):
 
         article_item['front_img_url'] = [front_img_url]
         article_item['url'] = response.url
+        article_item['url_object_id'] = md5_encode(response.url)
         article_item['title'] = title
         article_item['post_date'] = post_date
         article_item['category'] = category
