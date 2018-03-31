@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import re
+import datetime
 from scrapy.http import Request
 from urllib import parse
 from ArticleSpider.items import JobboleArticleItem
@@ -62,6 +63,12 @@ class JobboleSpider(scrapy.Spider):
         article_item['url'] = response.url
         article_item['url_object_id'] = md5_encode(response.url)
         article_item['title'] = title
+
+        if post_date:
+            post_date = datetime.datetime.strptime(post_date, '%Y/%m/%d')
+        else:
+            post_date = datetime.datetime.now().date()
+
         article_item['post_date'] = post_date
         article_item['category'] = category
         article_item['tag'] = tag
