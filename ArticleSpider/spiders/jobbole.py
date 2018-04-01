@@ -3,9 +3,8 @@ import scrapy
 
 from scrapy.http import Request
 from urllib import parse
-from scrapy.loader import ItemLoader
 
-from ArticleSpider.items import JobboleArticleItem
+from ArticleSpider.items import ArticleItemLoader, JobboleArticleItem
 from ArticleSpider.util.common import md5_encode
 
 
@@ -83,14 +82,15 @@ class JobboleSpider(scrapy.Spider):
         # article_item['bookmark_num'] = bookmark_num
         # article_item['comment_num'] = comment_num
 
-        item_loader = ItemLoader(item=JobboleArticleItem(), response=response)
+        item_loader = ArticleItemLoader(item=JobboleArticleItem(), response=response)
         item_loader.add_value('front_img_url', [front_img_url])
         item_loader.add_value('url', response.url)
         item_loader.add_value('url_object_id', md5_encode(response.url))
         item_loader.add_css('title', '.entry-header h1::text')
         item_loader.add_css('post_date', '.entry-meta-hide-on-mobile::text')
         item_loader.add_css('category', '.entry-meta-hide-on-mobile a[rel="category tag"]::text')
-        item_loader.add_css('content', '.entry-meta-hide-on-mobile :not([rel="category tag"])::text')
+        item_loader.add_css('tag', '.entry-meta-hide-on-mobile :not([rel="category tag"])::text')
+        item_loader.add_css('content', '.entry')
         item_loader.add_css('vote_num', '.vote-post-up h10::text')
         item_loader.add_css('bookmark_num', '.bookmark-btn::text')
         item_loader.add_css('comment_num', 'a[href="#article-comment"] span::text')
