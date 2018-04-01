@@ -12,6 +12,8 @@ import datetime
 from scrapy.loader import ItemLoader
 from scrapy.loader.processors import Compose, MapCompose, TakeFirst, Join
 
+from ArticleSpider.util.common import md5_encode
+
 
 class ArticlespiderItem(scrapy.Item):
     # define the fields for your item here like:
@@ -47,28 +49,18 @@ class ArticleItemLoader(ItemLoader):
 
 
 class JobboleArticleItem(scrapy.Item):
-    front_img_url = scrapy.Field(
-        output_processor=Compose()
-    )
+    front_img_url = scrapy.Field(output_processor=Compose(list))
     front_img_path = scrapy.Field()
     url = scrapy.Field()
-    url_object_id = scrapy.Field()
+    url_object_id = scrapy.Field(input_processor=MapCompose(md5_encode))
     title = scrapy.Field()
-    post_date = scrapy.Field(
-        output_processor=Compose(date_convert),
-    )
+    post_date = scrapy.Field(output_processor=Compose(date_convert))
     category = scrapy.Field()
     tag = scrapy.Field(
         input_processor=MapCompose(tag_filter),
         output_processor=Join(',')
     )
     content = scrapy.Field()
-    vote_num = scrapy.Field(
-        input_processor=MapCompose(int)
-    )
-    bookmark_num = scrapy.Field(
-        input_processor=MapCompose(num_filter)
-    )
-    comment_num = scrapy.Field(
-        input_processor=MapCompose(num_filter)
-    )
+    vote_num = scrapy.Field(input_processor=MapCompose(int))
+    bookmark_num = scrapy.Field(input_processor=MapCompose(num_filter))
+    comment_num = scrapy.Field(input_processor=MapCompose(num_filter))
