@@ -1,5 +1,6 @@
 import sys
 import os
+
 from scrapy.cmdline import execute
 
 # Set project directory, make execute available.

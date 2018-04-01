@@ -65,7 +65,7 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'ArticleSpider.pipelines.PostgreSQLTwistedPipeline': 1,
+    # 'ArticleSpider.pipelines.PostgreSQLTwistedPipeline': 1,
     # 'ArticleSpider.pipelines.ArticleImgPipeline': 1,
     # 'ArticleSpider.pipelines.JsonExporterPipeline': 2,
 }

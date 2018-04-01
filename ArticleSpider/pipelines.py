@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import psycopg2
 import psycopg2.extras
+
 from scrapy.pipelines.images import ImagesPipeline
 from scrapy.exporters import JsonItemExporter
 from twisted.enterprise import adbapi
@@ -77,8 +78,8 @@ class PostgreSQLTwistedPipeline:
                     tag,
                     content,
                     vote_num,
-                    comment_num,
-                    bookmark_num
+                    bookmark_num,
+                    comment_num
                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 '''
 
@@ -93,6 +94,6 @@ class PostgreSQLTwistedPipeline:
             item['tag'],
             item['content'],
             item['vote_num'],
-            item['comment_num'],
-            item['bookmark_num']
+            item['bookmark_num'],
+            item['comment_num']
         ))
