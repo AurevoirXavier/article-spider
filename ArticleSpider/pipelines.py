@@ -15,6 +15,7 @@ from twisted.enterprise import adbapi
 
 class ArticleImgPipeline(ImagesPipeline):
     def item_completed(self, results, item, info):
+        # TODO if 'front_image_url' in item:
         for ok, d in results:
             if ok:
                 item['front_img_path'] = d['path']

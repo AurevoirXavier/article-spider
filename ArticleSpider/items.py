@@ -10,7 +10,7 @@ import re
 import datetime
 
 from scrapy.loader import ItemLoader
-from scrapy.loader.processors import MapCompose, TakeFirst, Join
+from scrapy.loader.processors import Compose, MapCompose, TakeFirst, Join
 
 
 class ArticlespiderItem(scrapy.Item):
@@ -19,19 +19,10 @@ class ArticlespiderItem(scrapy.Item):
     pass
 
 
-def default_output(value):
-    return value
-
-
 def date_convert(text):
-    if text[0]:
-        return datetime.datetime.strptime(
-            re.sub(r'[ \r\n·]',
-                   '',
-                   text[0]
-                   ),
-            '%Y/%m/%d'
-        )
+    date = re.sub(r'[ \r\n·]', '', text[0])
+    if date:
+        return datetime.datetime.strptime(date, '%Y/%m/%d')
     else:
         return datetime.datetime.now()
 
@@ -57,14 +48,14 @@ class ArticleItemLoader(ItemLoader):
 
 class JobboleArticleItem(scrapy.Item):
     front_img_url = scrapy.Field(
-        output_processor=MapCompose(default_output)
+        output_processor=Compose()
     )
     front_img_path = scrapy.Field()
     url = scrapy.Field()
     url_object_id = scrapy.Field()
     title = scrapy.Field()
     post_date = scrapy.Field(
-        output_processor=MapCompose(date_convert),
+        output_processor=Compose(date_convert),
     )
     category = scrapy.Field()
     tag = scrapy.Field(
