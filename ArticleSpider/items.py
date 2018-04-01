@@ -19,13 +19,21 @@ class ArticlespiderItem(scrapy.Item):
     pass
 
 
-def date_convert(text):
-    date = re.sub(r'[ \r\n·]', '', text)
+def default_output(value):
+    return value
 
-    if date:
-        return datetime.datetime.strptime(date, '%Y/%m/%d')
+
+def date_convert(text):
+    if text[0]:
+        return datetime.datetime.strptime(
+            re.sub(r'[ \r\n·]',
+                   '',
+                   text[0]
+                   ),
+            '%Y/%m/%d'
+        )
     else:
-        return None
+        return datetime.datetime.now()
 
 
 def num_filter(text):
@@ -36,21 +44,31 @@ def num_filter(text):
         return 0
 
 
+def tag_filter(tag):
+    if '评论' in tag:
+        return None
+    else:
+        return tag
+
+
 class ArticleItemLoader(ItemLoader):
     default_output_processor = TakeFirst()
 
 
 class JobboleArticleItem(scrapy.Item):
-    front_img_url = scrapy.Field()
+    front_img_url = scrapy.Field(
+        output_processor=MapCompose(default_output)
+    )
     front_img_path = scrapy.Field()
     url = scrapy.Field()
     url_object_id = scrapy.Field()
     title = scrapy.Field()
     post_date = scrapy.Field(
-        input_processor=MapCompose(date_convert),
+        output_processor=MapCompose(date_convert),
     )
     category = scrapy.Field()
     tag = scrapy.Field(
+        input_processor=MapCompose(tag_filter),
         output_processor=Join(',')
     )
     content = scrapy.Field()
