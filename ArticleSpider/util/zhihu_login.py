@@ -49,7 +49,7 @@ class ZhihuUser:
             'Accept-Language': 'en-us',
             'DNT': '1',
             'authorization': 'oauth c3cef7c66a1843f8b3a9e6a1e3160e20',
-            'X-Xsrftoken': self._get_xsrftoken()
+            'X-Xsrftoken': self.session.get(self.sign_up_address).cookies.get('_xsrf')
         })
 
         self.multipart_form.update({
@@ -71,27 +71,6 @@ class ZhihuUser:
         )
 
         return self.online_status()
-
-    def _load_cookie(self):
-        try:
-            self.session.cookies.load(ignore_discard=True)
-
-            return True
-        except FileNotFoundError:
-            return False
-
-    def online_status(self):
-        if self.session.get(
-                self.sign_up_address,
-                allow_redirects=False
-        ).status_code == 302:
-            self.session.cookies.save()
-
-            return True
-        return False
-
-    def _get_xsrftoken(self):
-        return self.session.get(self.sign_up_address).cookies.get('_xsrf')
 
     def _get_captcha(self, headers):
         auth_address = 'https://www.zhihu.com/api/v3/oauth/captcha?lang=en'
@@ -128,6 +107,16 @@ class ZhihuUser:
 
             return input_text
         return ''
+
+    def online_status(self):
+        if self.session.get(
+                self.sign_up_address,
+                allow_redirects=False
+        ).status_code == 302:
+            self.session.cookies.save()
+
+            return True
+        return False
 
 
 user = ZhihuUser()
