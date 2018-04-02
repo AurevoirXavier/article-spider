@@ -9,7 +9,7 @@ from ArticleSpider.items import ArticleItemLoader, JobboleArticleItem
 
 class ArticlespiderPipeline(object):
     def process_item(self, item, spider):
-        return item
+        return item 
 
 
 class JobboleSpider(scrapy.Spider):
