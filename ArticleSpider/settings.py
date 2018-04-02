@@ -67,7 +67,7 @@ ROBOTSTXT_OBEY = False
 ITEM_PIPELINES = {
     # 'ArticleSpider.pipelines.ArticleImgPipeline': 1,
     # 'ArticleSpider.pipelines.JsonExporterPipeline': 2,
-    'ArticleSpider.pipelines.PostgreSQLTwistedPipeline': 3,
+    # 'ArticleSpider.pipelines.PostgreSQLTwistedPipeline': 3,
 }
 
 IMAGES_URLS_FIELD = 'front_img_url'
