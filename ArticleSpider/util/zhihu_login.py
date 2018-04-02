@@ -1,15 +1,14 @@
 import requests
 import re
-import hmac
 import base64
 
 from time import time
 from http.cookiejar import LWPCookieJar
-from hashlib import sha1
+from ArticleSpider.util.common import hmac_encode
 from PIL import Image
 
-HOMEPAGE = 'https://www.zhihu.com'
-SIGN_IN_PAGE = 'https://www.zhihu.com/api/v3/oauth/sign_in'
+SIGN_UP_ADDRESS = 'https://www.zhihu.com/signup'
+SIGN_IN_ADDRESS = 'https://www.zhihu.com/api/v3/oauth/sign_in'
 MULTIPART_FORM = {
     'client_id': 'c3cef7c66a1843f8b3a9e6a1e3160e20',
     'grant_type': 'password',
@@ -23,14 +22,14 @@ HEADERS = {
     'Host': 'www.zhihu.com',
     'Connection': 'keep-alive',
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1 Safari/605.1.15',
-    'Referer': 'https://www.zhihu.com/signup?next=%2F',
+    'Referer': 'https://www.zhihu.com/signup?next=%2F'
 }
 
 
-class Spider:
+class ZhihuUser:
     def __init__(self):
-        self.homepage = HOMEPAGE
-        self.sign_in_page = SIGN_IN_PAGE
+        self.sign_up_address = SIGN_UP_ADDRESS
+        self.sign_in_address = SIGN_IN_ADDRESS
         self.multipart_form = MULTIPART_FORM.copy()
         self.session = requests.session()
         self.session.headers = HEADERS.copy()
@@ -38,7 +37,7 @@ class Spider:
 
     def sign_in(self, username, password, load_cookie=True):
         if load_cookie and self._load_cookie():
-            return self._login_status()
+            return self.online_status()
 
         headers = self.session.headers.copy()
         timestamp = str(int(time() * 1000))
@@ -57,16 +56,21 @@ class Spider:
             'username': username,
             'password': password,
             'timestamp': timestamp,
-            'signature': self._get_signature(timestamp),
-            'captcha': self._get_captcha(headers),
+            'signature': hmac_encode(
+                self.multipart_form['grant_type'],
+                self.multipart_form['client_id'],
+                self.multipart_form['source'],
+                timestamp
+            ),
+            'captcha': self._get_captcha(headers)
         })
         self.session.post(
-            self.sign_in_page,
+            self.sign_in_address,
             data=self.multipart_form,
             headers=headers
         )
 
-        return self._login_status()
+        return self.online_status()
 
     def _load_cookie(self):
         try:
@@ -76,9 +80,9 @@ class Spider:
         except FileNotFoundError:
             return False
 
-    def _login_status(self):
+    def online_status(self):
         if self.session.get(
-                self.sign_in_page,
+                self.sign_up_address,
                 allow_redirects=False
         ).status_code == 302:
             self.session.cookies.save()
@@ -87,24 +91,7 @@ class Spider:
         return False
 
     def _get_xsrftoken(self):
-        return re.findall(
-            r'_xsrf=([\w|-]+)',
-            self.session
-                .get(self.sign_in_page)
-                .headers
-                .get('Set-Cookie')
-        )[0]
-
-    def _get_signature(self, timestamp):
-        signature = hmac.new(b'd1b964811afb40118a12068ff74a12f4', digestmod=sha1)
-        signature.update(
-            bytes(
-                MULTIPART_FORM['grant_type'] + MULTIPART_FORM['client_id'] + MULTIPART_FORM['source'] + timestamp,
-                'utf8'
-            )
-        )
-
-        return signature.hexdigest()
+        return self.session.get(self.sign_up_address).cookies.get('_xsrf')
 
     def _get_captcha(self, headers):
         auth_address = 'https://www.zhihu.com/api/v3/oauth/captcha?lang=en'
@@ -141,3 +128,7 @@ class Spider:
 
             return input_text
         return ''
+
+
+user = ZhihuUser()
+print(user.sign_in('13265034090', 'TwistedFate520!#'))
