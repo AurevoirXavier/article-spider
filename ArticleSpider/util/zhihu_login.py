@@ -72,6 +72,14 @@ class ZhihuUser:
 
         return self.online_status()
 
+    def _load_cookie(self):
+        try:
+            self.session.cookies.load(ignore_discard=True)
+
+            return True
+        except FileNotFoundError:
+            return False
+
     def _get_captcha(self, headers):
         auth_address = 'https://www.zhihu.com/api/v3/oauth/captcha?lang=en'
         captcha = re.search(
