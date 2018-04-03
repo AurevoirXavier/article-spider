@@ -26,6 +26,8 @@ HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1 Safari/605.1.15',
     'Referer': 'https://www.zhihu.com/signup?next=%2F'
 }
+COOKIE_PATH = secret.SECRET_PATH + '/cookie'
+CAPTCHA_PATH = secret.SECRET_PATH + '/captcha'
 
 
 class ZhihuUser:
@@ -35,7 +37,7 @@ class ZhihuUser:
         self.multipart_form = MULTIPART_FORM.copy()
         self.session = requests.session()
         self.session.headers = HEADERS.copy()
-        self.session.cookies = LWPCookieJar(filename='./cookie')
+        self.session.cookies = LWPCookieJar(filename=COOKIE_PATH)
 
     def sign_in(self, username, password, load_cookie=True):
         if load_cookie and self._load_cookie():
@@ -100,10 +102,10 @@ class ZhihuUser:
                 re.S
             )[0].replace(r'\n', '')
 
-            with open('./captcha.jpg', 'wb') as f:
+            with open('CAPTCHA_PATH', 'wb') as f:
                 f.write(base64.b64decode(base64_img))
 
-            Image.open('./captcha.jpg').show()
+            Image.open('CAPTCHA_PATH').show()
 
             input_text = input('Captcha: ')
 

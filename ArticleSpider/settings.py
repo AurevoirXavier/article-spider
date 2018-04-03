@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 
+from ArticleSpider.util.secret import secret
+
 # Scrapy settings for ArticleSpider project
 #
 # For simplicity, this file contains only settings considered important or
@@ -95,8 +97,8 @@ IMAGES_STORE = os.path.join(project_dir, 'img')
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-POSTGRESQL_HOST = 'arch-linux'
-POSTGRESQL_PORT = '5432'
-POSTGRESQL_USER = 'aurevoirxavier'
-POSTGRESQL_PASSWORD = ''
-POSTGRESQL_DATABASE = 'jobbole_spider'
+POSTGRESQL_HOST = secret.POSTGRESQL_HOST
+POSTGRESQL_PORT = secret.POSTGRESQL_PORT
+POSTGRESQL_USER = secret.POSTGRESQL_USER
+POSTGRESQL_PASSWORD = secret.POSTGRESQL_PASSWORD
+POSTGRESQL_JOBBOLE_DATABASE = secret.POSTGRESQL_JOBBOLE_DATABASE

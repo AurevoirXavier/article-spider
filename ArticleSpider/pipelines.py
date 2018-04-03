@@ -51,7 +51,7 @@ class PostgreSQLTwistedPipeline:
             port=settings['POSTGRESQL_PORT'],
             user=settings['POSTGRESQL_USER'],
             password=settings['POSTGRESQL_PASSWORD'],
-            database=settings['POSTGRESQL_DATABASE'],
+            database=settings['POSTGRESQL_JOBBOLE_DATABASE'],
             cursor_factory=psycopg2.extras.DictCursor,
         )
 
