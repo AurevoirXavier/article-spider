@@ -7,6 +7,8 @@ from http.cookiejar import LWPCookieJar
 from ArticleSpider.util.common import hmac_encode
 from PIL import Image
 
+from ArticleSpider.util.secret import secret
+
 SIGN_UP_ADDRESS = 'https://www.zhihu.com/signup'
 SIGN_IN_ADDRESS = 'https://www.zhihu.com/api/v3/oauth/sign_in'
 MULTIPART_FORM = {
@@ -128,4 +130,4 @@ class ZhihuUser:
 
 
 user = ZhihuUser()
-print(user.sign_in())
+print(user.sign_in(secret.ZHIHU_USERNAME, secret.ZHIHU_PASSWORD))
