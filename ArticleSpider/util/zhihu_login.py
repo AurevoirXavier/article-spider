@@ -10,6 +10,12 @@ from ArticleSpider.util.secret.secret import ZHIHU_USERNAME, ZHIHU_PASSWORD
 
 SIGN_UP_ADDRESS = 'https://www.zhihu.com/signup'
 SIGN_IN_ADDRESS = 'https://www.zhihu.com/api/v3/oauth/sign_in'
+HEADERS = {
+    'Host': 'www.zhihu.com',
+    'Connection': 'keep-alive',
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1 Safari/605.1.15',
+    'Referer': 'https://www.zhihu.com/'
+}
 MULTIPART_FORM = {
     'client_id': 'c3cef7c66a1843f8b3a9e6a1e3160e20',
     'grant_type': 'password',
@@ -19,21 +25,15 @@ MULTIPART_FORM = {
     'lang': 'en',
     'ref_source': 'homepage'
 }
-HEADERS = {
-    'Host': 'www.zhihu.com',
-    'Connection': 'keep-alive',
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1 Safari/605.1.15',
-    'Referer': 'https://www.zhihu.com/'
-}
 
 
 class ZhihuUser:
     def __init__(self):
         self.sign_up_address = SIGN_UP_ADDRESS
         self.sign_in_address = SIGN_IN_ADDRESS
-        self.multipart_form = MULTIPART_FORM.copy()
         self.session = requests.session()
         self.session.headers = HEADERS.copy()
+        self.multipart_form = MULTIPART_FORM.copy()
         self.session.cookies = LWPCookieJar(filename='./cookie')
 
     def sign_in(self, username, password, load_cookie=True):
@@ -41,8 +41,6 @@ class ZhihuUser:
             return self.online_status()
 
         headers = self.session.headers.copy()
-        timestamp = str(int(time() * 1000))
-
         headers.update({
             'Origin': 'https://www.zhihu.com',
             'Accept': 'application/json, text/plain, */*',
@@ -53,6 +51,7 @@ class ZhihuUser:
             'X-Xsrftoken': self.session.get(self.sign_up_address).cookies.get('_xsrf')
         })
 
+        timestamp = str(int(time() * 1000))
         self.multipart_form.update({
             'username': username,
             'password': password,
