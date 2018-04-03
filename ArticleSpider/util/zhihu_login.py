@@ -6,8 +6,7 @@ from time import time
 from http.cookiejar import LWPCookieJar
 from ArticleSpider.util.common import hmac_encode
 from PIL import Image
-
-from ArticleSpider.util.secret import secret
+from ArticleSpider.util.secret.secret import ZHIHU_USERNAME, ZHIHU_PASSWORD
 
 SIGN_UP_ADDRESS = 'https://www.zhihu.com/signup'
 SIGN_IN_ADDRESS = 'https://www.zhihu.com/api/v3/oauth/sign_in'
@@ -24,10 +23,8 @@ HEADERS = {
     'Host': 'www.zhihu.com',
     'Connection': 'keep-alive',
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1 Safari/605.1.15',
-    'Referer': 'https://www.zhihu.com/signup?next=%2F'
+    'Referer': 'https://www.zhihu.com/'
 }
-COOKIE_PATH = secret.SECRET_PATH + '/cookie'
-CAPTCHA_PATH = secret.SECRET_PATH + '/captcha'
 
 
 class ZhihuUser:
@@ -37,7 +34,7 @@ class ZhihuUser:
         self.multipart_form = MULTIPART_FORM.copy()
         self.session = requests.session()
         self.session.headers = HEADERS.copy()
-        self.session.cookies = LWPCookieJar(filename=COOKIE_PATH)
+        self.session.cookies = LWPCookieJar(filename='./cookie')
 
     def sign_in(self, username, password, load_cookie=True):
         if load_cookie and self._load_cookie():
@@ -102,10 +99,10 @@ class ZhihuUser:
                 re.S
             )[0].replace(r'\n', '')
 
-            with open('CAPTCHA_PATH', 'wb') as f:
+            with open('./captcha', 'wb') as f:
                 f.write(base64.b64decode(base64_img))
 
-            Image.open('CAPTCHA_PATH').show()
+            Image.open('./captcha').show()
 
             input_text = input('Captcha: ')
 
@@ -132,8 +129,7 @@ class ZhihuUser:
 
 
 user = ZhihuUser()
-user.sign_in(secret.ZHIHU_USERNAME, secret.ZHIHU_PASSWORD)
+user.sign_in(ZHIHU_USERNAME, ZHIHU_PASSWORD)
 
-# Check sign in
-# with open('index.html', 'wb') as f:
-#     f.write(user.session.get('http://www.zhihu.com', headers=HEADERS).text.encode('utf8'))
+with open('index.html', 'wb') as f:
+    f.write(user.session.get('http://www.zhihu.com', headers=HEADERS).text.encode('utf8'))
