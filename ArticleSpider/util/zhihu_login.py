@@ -132,4 +132,8 @@ class ZhihuUser:
 
 
 user = ZhihuUser()
-print(user.sign_in(secret.ZHIHU_USERNAME, secret.ZHIHU_PASSWORD))
+user.sign_in(secret.ZHIHU_USERNAME, secret.ZHIHU_PASSWORD)
+
+# Check sign in
+# with open('index.html', 'wb') as f:
+#     f.write(user.session.get('http://www.zhihu.com', headers=HEADERS).text.encode('utf8'))
