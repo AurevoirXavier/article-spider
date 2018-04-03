@@ -128,4 +128,4 @@ class ZhihuUser:
 
 
 user = ZhihuUser()
-print(user.sign_in('13265034090', 'TwistedFate520!#'))
+print(user.sign_in())
