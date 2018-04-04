@@ -64,3 +64,9 @@ def word_eliminator(text):
         return int(re_match.group(1))
     else:
         return 0
+
+
+def format_timestamp(timestamp):
+    return datetime.datetime \
+        .fromtimestamp(timestamp) \
+        .strftime(SQL_DATETIME_FORMAT)

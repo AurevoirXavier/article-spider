@@ -123,7 +123,7 @@ class ZhihuQuestionItem(scrapy.Item):
             self['comments'],
             self['follower_and_views'][0],
             self['follower_and_views'][1],
-            datetime.datetime.now().strftime(common.SQL_DATE_FORMAT)
+            datetime.datetime.now().strftime(common.SQL_DATETIME_FORMAT)
         )
 
         return insert_sql, params
@@ -164,9 +164,9 @@ class ZhihuAnswerItem(scrapy.Item):
             self['content'],
             self['votes'],
             self['comments'],
-            self['created_time'],
-            self['updated_time'],
-            self['crawl_time']
+            common.format_timestamp(self['created_time']),
+            common.format_timestamp(['updated_time']),
+            self['crawl_time'].strftime(common.SQL_DATETIME_FORMAT)
         )
 
         return insert_sql, params
