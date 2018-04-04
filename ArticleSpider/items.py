@@ -123,7 +123,7 @@ class ZhihuQuestionItem(scrapy.Item):
             self['comments'],
             self['follower_and_views'][0],
             self['follower_and_views'][1],
-            datetime.datetime.now().strftime(common.SQL_DATE_FORMAT),
+            datetime.datetime.now().strftime(common.SQL_DATE_FORMAT)
         )
 
         return insert_sql, params
@@ -140,3 +140,33 @@ class ZhihuAnswerItem(scrapy.Item):
     created_time = scrapy.Field()
     updated_time = scrapy.Field()
     crawl_time = scrapy.Field()
+
+    def insert_sql_with_params(self):
+        insert_sql = '''
+            INSERT INTO zhihu_spider.answer (
+                answer_id,
+                url,
+                question_id,
+                author_id,
+                content,
+                votes,
+                comments,
+                created_time,
+                updated_time,
+                crawl_time
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            '''
+        params = (
+            self['answer_id'],
+            self['url'],
+            self['question_id'],
+            self['author_id'],
+            self['content'],
+            self['votes'],
+            self['comments'],
+            self['created_time'],
+            self['updated_time'],
+            self['crawl_time']
+        )
+
+        return insert_sql, params
