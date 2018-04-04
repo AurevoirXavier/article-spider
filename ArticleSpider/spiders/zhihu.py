@@ -8,6 +8,9 @@ from time import time
 from ArticleSpider.util.common import hmac_encode
 from PIL import Image
 from ArticleSpider.util.secret.secret import ZHIHU_USERNAME, ZHIHU_PASSWORD
+from urllib.parse import urljoin
+from scrapy.loader import ItemLoader
+from ArticleSpider.items import ZhihuAnswerItem, ZhihuQuestionItem
 
 SIGN_UP_ADDRESS = 'https://www.zhihu.com/signup'
 SIGN_IN_ADDRESS = 'https://www.zhihu.com/api/v3/oauth/sign_in'
@@ -151,4 +154,21 @@ class ZhihuSpider(scrapy.Spider):
                 yield Request(url, dont_filter=True, headers=self.headers)
 
     def parse(self, response):
+        all_urls = [
+            urljoin(response.url, url)
+            for url in response.css('a::attr(href)').extract()
+        ]
+
+        for url in all_urls:
+            re_match = re.match(r'(.*zhihu.com/question/(\d+))(/|$).*', url)
+            if re_match:
+                yield Request(
+                    re_match.group(1),
+                    headers=self.headers,
+                    callback=self.parse_question
+                )
+
+    def parse_question(self, response):
+        item_loader = ItemLoader(item=ZhihuQuestionItem(), response=response)
+        item_loader.add_css()
         pass

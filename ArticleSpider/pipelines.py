@@ -78,9 +78,9 @@ class PostgreSQLTwistedPipeline:
                     category,
                     tag,
                     content,
-                    vote_num,
-                    bookmark_num,
-                    comment_num
+                    votes,
+                    bookmarks,
+                    comments
                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 '''
 
@@ -94,7 +94,7 @@ class PostgreSQLTwistedPipeline:
             item['category'],
             item['tag'],
             item['content'],
-            item['vote_num'],
-            item['bookmark_num'],
-            item['comment_num']
+            item['votes'],
+            item['bookmarks'],
+            item['comments']
         ))

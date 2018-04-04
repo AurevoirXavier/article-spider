@@ -2,7 +2,7 @@
 import scrapy
 
 from scrapy.http import Request
-from urllib import parse
+from urllib.parse import urljoin
 
 from ArticleSpider.items import ArticleItemLoader, JobboleArticleItem
 
@@ -21,17 +21,17 @@ class JobboleSpider(scrapy.Spider):
         post_nodes = response.css('#archive .floated-thumb .post-thumb a')
 
         for post_node in post_nodes:
-            front_img_url = parse.urljoin(response.url, post_node.css('img::attr(src)').extract_first(''))
+            front_img_url = urljoin(response.url, post_node.css('img::attr(src)').extract_first(''))
             post_url = post_node.css('::attr(href)').extract_first('')
             yield Request(
-                url=parse.urljoin(response.url, post_url),
+                url=urljoin(response.url, post_url),
                 meta={'front_img_url': front_img_url},
                 callback=self.parse_detail
             )
 
         next_url = response.css('.next.page-numbers::attr(href)').extract_first('')
         if next_url:
-            yield Request(url=parse.urljoin(response.url, post_url), callback=self.parse)
+            yield Request(url=urljoin(response.url, post_url), callback=self.parse)
 
     def parse_detail(self, response):
         item_loader = ArticleItemLoader(item=JobboleArticleItem(), response=response)
@@ -43,9 +43,9 @@ class JobboleSpider(scrapy.Spider):
         item_loader.add_css('category', '.entry-meta-hide-on-mobile a[rel="category tag"]::text')
         item_loader.add_css('tag', '.entry-meta-hide-on-mobile :not([rel="category tag"])::text')
         item_loader.add_css('content', '.entry')
-        item_loader.add_css('vote_num', '.vote-post-up h10::text')
-        item_loader.add_css('bookmark_num', '.bookmark-btn::text')
-        item_loader.add_css('comment_num', 'a[href="#article-comment"] span::text')
+        item_loader.add_css('votes', '.vote-post-up h10::text')
+        item_loader.add_css('bookmarks', '.bookmark-btn::text')
+        item_loader.add_css('comments', 'a[href="#article-comment"] span::text')
 
         article_item = item_loader.load_item()
 

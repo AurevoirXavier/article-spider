@@ -30,9 +30,9 @@ def date_convert(text):
 
 
 def num_filter(text):
-    match_re = re.match(r'.*?(\d+).*', text)
-    if match_re:
-        return int(match_re.group(1))
+    re_match = re.match(r'.*?(\d+).*', text)
+    if re_match:
+        return int(re_match.group(1))
     else:
         return 0
 
@@ -61,6 +61,32 @@ class JobboleArticleItem(scrapy.Item):
         output_processor=Join(',')
     )
     content = scrapy.Field()
-    vote_num = scrapy.Field(input_processor=MapCompose(int))
-    bookmark_num = scrapy.Field(input_processor=MapCompose(num_filter))
-    comment_num = scrapy.Field(input_processor=MapCompose(num_filter))
+    votes = scrapy.Field(input_processor=MapCompose(int))
+    bookmarks = scrapy.Field(input_processor=MapCompose(num_filter))
+    comments = scrapy.Field(input_processor=MapCompose(num_filter))
+
+
+class ZhihuQuestionItem(scrapy.Item):
+    zhihu_id = scrapy.Field()
+    topic = scrapy.Field()
+    url = scrapy.Field()
+    title = scrapy.Field()
+    content = scrapy.Field()
+    answers = scrapy.Field()
+    comments = scrapy.Field()
+    views = scrapy.Field()
+    clicks = scrapy.Field()
+    crawl_time = scrapy.Field()
+
+
+class ZhihuAnswerItem(scrapy.Item):
+    zhihu_id = scrapy.Field()
+    url = scrapy.Field()
+    question_id = scrapy.Field()
+    author_id = scrapy.Field()
+    content = scrapy.Field()
+    votes = scrapy.Field()
+    comments = scrapy.Field()
+    create_time = scrapy.Field()
+    update_time = scrapy.Field()
+    crawl_time = scrapy.Field()
