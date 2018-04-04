@@ -41,7 +41,7 @@ class JobboleArticleItem(scrapy.Item):
 
     def insert_sql_with_params(self):
         insert_sql = '''
-            INSERT INTO article (
+            INSERT INTO jobbole_spider.article (
                 front_img_url,
                 front_img_path,
                 url,
@@ -99,9 +99,8 @@ class ZhihuQuestionItem(scrapy.Item):
     crawl_time = scrapy.Field()
 
     def insert_sql_with_params(self):
-        a = self['follower_and_views']
         insert_sql = '''
-            INSERT INTO question (
+            INSERT INTO zhihu_spider.question (
                 question_id,
                 topics,
                 url,
@@ -111,7 +110,7 @@ class ZhihuQuestionItem(scrapy.Item):
                 comments,
                 follower,
                 views,
-                crawl_time,
+                crawl_time
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             '''
         params = (
@@ -124,7 +123,7 @@ class ZhihuQuestionItem(scrapy.Item):
             self['comments'],
             self['follower_and_views'][0],
             self['follower_and_views'][1],
-            datetime.datetime.now().strftime(common.SQL_DATETIME_FORMAT),
+            datetime.datetime.now().strftime(common.SQL_DATE_FORMAT),
         )
 
         return insert_sql, params

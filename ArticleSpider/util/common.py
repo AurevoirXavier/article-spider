@@ -5,8 +5,8 @@ import datetime
 
 from hashlib import sha1
 
-SQL_DATETIME_FORMAT = '%H:%M/%m/%d/Y'
-SQL_DATE_FORMAT = '%m/%d/Y'
+SQL_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+SQL_DATE_FORMAT = '%Y-%m-%d'
 
 
 def md5_encode(url):
@@ -41,7 +41,7 @@ def hmac_encode(grant_type, client_id, source, timestamp):
 def date_convert(text):
     date = re.sub(r'[ \r\n·]', '', text[0])
     if date:
-        return datetime.datetime.strptime(date, SQL_DATETIME_FORMAT)
+        return datetime.datetime.strptime(date, SQL_DATE_FORMAT)
     else:
         return datetime.datetime.now()
 
