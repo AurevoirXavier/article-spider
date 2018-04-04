@@ -95,12 +95,12 @@ class ZhihuSpider(scrapy.Spider):
                 }
                 , callback=self._get_captcha)
         else:
-            return [scrapy.FormRequest(
+            yield scrapy.FormRequest(
                 url=self.sign_in_address,
                 headers=headers,
                 formdata=response.meta.get('form_data'),
                 callback=self._online_status
-            )]
+            )
 
     def _get_captcha(self, response):
         headers = response.meta.get('headers')
@@ -118,7 +118,7 @@ class ZhihuSpider(scrapy.Spider):
 
         input_text = input('Captcha: ')
 
-        yield scrapy.FormRequest(
+        scrapy.FormRequest(
             url=self.auth_address,
             headers=headers,
             formdata={
@@ -131,17 +131,17 @@ class ZhihuSpider(scrapy.Spider):
             'captcha': input_text
         })
 
-        return [scrapy.FormRequest(
+        yield scrapy.FormRequest(
             url=self.sign_in_address,
             headers=headers,
             formdata=form_data,
             callback=self._online_status
-        )]
+        )
 
     def _online_status(self, response):
         if response.status == 201:
             for url in self.start_urls:
-                yield self.make_requests_from_url(url, dont_filter=True, header=self.headers)
+                yield scrapy.Request(url, dont_filter=True, headers=self.headers)
 
     def parse(self, response):
         pass
