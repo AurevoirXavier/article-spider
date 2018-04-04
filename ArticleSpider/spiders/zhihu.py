@@ -82,13 +82,9 @@ class ZhihuSpider(scrapy.Spider):
         )
 
     def _auth(self, response):
-        headers = response.meta.get("headers")
-        captcha = re.search(
-            r'true',
-            response.text
-        )
+        headers = response.meta.get('headers')
 
-        if captcha:
+        if re.search(r'true', response.text):
             yield scrapy.Request(
                 self.auth_address,
                 method='PUT',
@@ -102,7 +98,7 @@ class ZhihuSpider(scrapy.Spider):
             return [scrapy.FormRequest(
                 url=self.sign_in_address,
                 headers=headers,
-                formdata=response.meta.get("form_data"),
+                formdata=response.meta.get('form_data'),
                 callback=self._online_status
             )]
 
@@ -115,10 +111,10 @@ class ZhihuSpider(scrapy.Spider):
             re.S
         )[0].replace(r'\n', '')
 
-        with open('./captcha', 'wb') as f:
+        with open('./util/captcha', 'wb') as f:
             f.write(base64.b64decode(base64_img))
 
-        Image.open('./captcha').show()
+        Image.open('./util/captcha').show()
 
         input_text = input('Captcha: ')
 
