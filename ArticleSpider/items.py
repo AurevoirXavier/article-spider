@@ -165,7 +165,7 @@ class ZhihuAnswerItem(scrapy.Item):
             self['votes'],
             self['comments'],
             common.format_timestamp(self['created_time']),
-            common.format_timestamp(['updated_time']),
+            common.format_timestamp(self['updated_time']),
             self['crawl_time'].strftime(common.SQL_DATETIME_FORMAT)
         )
 

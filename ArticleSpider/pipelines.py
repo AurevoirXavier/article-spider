@@ -68,5 +68,4 @@ class PostgreSQLTwistedPipeline:
 
     def insert(self, cursor, item):
         sql, params = item.insert_sql_with_params()
-
         cursor.execute(sql, params)

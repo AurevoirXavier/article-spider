@@ -215,7 +215,7 @@ class ZhihuSpider(scrapy.Spider):
             answer_item['answer_id'] = answer['id']
             answer_item['url'] = answer['url']
             answer_item['question_id'] = answer['question']['id']
-            answer_item['author_id'] = int(answer['author']['id'])
+            answer_item['author_id'] = answer['author']['id']
             answer_item['content'] = answer['content'] if 'content' in answer else answer['excerpt']
             answer_item['votes'] = answer['voteup_count']
             answer_item['comments'] = answer['comment_count']
