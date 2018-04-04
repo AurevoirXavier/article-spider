@@ -178,7 +178,8 @@ class ZhihuSpider(scrapy.Spider):
                     callback=self.parse_question
                 )
             else:
-                yield Request(url, headers=self.headers, callback=self.parse)
+                pass
+                # yield Request(url, headers=self.headers, callback=self.parse)
 
     def parse_question(self, response):
         question_id = re.match(
@@ -186,23 +187,23 @@ class ZhihuSpider(scrapy.Spider):
             response.url
         ).group(2)
 
-        item_loader = ZhihuQuestionItemLoader(item=ZhihuQuestionItem(), response=response)
-        item_loader.add_value('question_id', question_id)
-        item_loader.add_css('topics', '.TopicLink .Popover div::text')
-        item_loader.add_value('url', response.url)
-        item_loader.add_css('title', 'h1.QuestionHeader-title::text')
-        item_loader.add_css('content', '.QuestionHeader-detail')
-        item_loader.add_css('answers', '.List-headerText span::text')
-        item_loader.add_css('comments', '.QuestionHeader-Comment button::text')
-        item_loader.add_css('follower_and_views', '.NumberBoard-itemValue::attr(title)')
+        zhihu_question_item_loader = ZhihuQuestionItemLoader(item=ZhihuQuestionItem(), response=response)
+        zhihu_question_item_loader.add_value('question_id', question_id)
+        zhihu_question_item_loader.add_css('topics', '.TopicLink .Popover div::text')
+        zhihu_question_item_loader.add_value('url', response.url)
+        zhihu_question_item_loader.add_css('title', 'h1.QuestionHeader-title::text')
+        zhihu_question_item_loader.add_css('content', '.QuestionHeader-detail')
+        zhihu_question_item_loader.add_css('answers', '.List-headerText span::text')
+        zhihu_question_item_loader.add_css('comments', '.QuestionHeader-Comment button::text')
+        zhihu_question_item_loader.add_css('follower_and_views', '.NumberBoard-itemValue::attr(title)')
 
-        yield Request(
-            self.answer_api.format(question_id, 20, 0),
-            headers=self.headers,
-            callback=self.parse_answer
-        )
-
-        yield item_loader.load_item()
+        # yield Request(
+        #     self.answer_api.format(question_id, 20, 0),
+        #     headers=self.headers,
+        #     callback=self.parse_answer
+        # )
+        a = zhihu_question_item_loader.load_item()
+        yield a
 
         # self.parse(response)
 

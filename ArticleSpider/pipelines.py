@@ -51,8 +51,8 @@ class PostgreSQLTwistedPipeline:
             port=settings['POSTGRESQL_PORT'],
             user=settings['POSTGRESQL_USER'],
             password=settings['POSTGRESQL_PASSWORD'],
-            database=settings['POSTGRESQL_JOBBOLE_DATABASE'],
-            cursor_factory=psycopg2.extras.DictCursor,
+            # database=settings['POSTGRESQL_JOBBOLE_DATABASE'],
+            cursor_factory=psycopg2.extras.DictCursor
         )
 
         db_pool = adbapi.ConnectionPool('psycopg2', **db_params)
@@ -64,7 +64,7 @@ class PostgreSQLTwistedPipeline:
         querry.addErrback(self.handler_err, item, spider)
 
     def handler_err(self, failure, item, spider):
-        print(failure)
+        print(failure, item, spider)
 
     def insert(self, cursor, item):
         sql, params = item.insert_sql_with_params()

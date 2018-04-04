@@ -5,6 +5,9 @@ import datetime
 
 from hashlib import sha1
 
+SQL_DATETIME_FORMAT = '%H:%M/%m/%d/Y'
+SQL_DATE_FORMAT = '%m/%d/Y'
+
 
 def md5_encode(url):
     if isinstance(url, str):
@@ -38,17 +41,21 @@ def hmac_encode(grant_type, client_id, source, timestamp):
 def date_convert(text):
     date = re.sub(r'[ \r\n·]', '', text[0])
     if date:
-        return datetime.datetime.strptime(date, '%Y-%m-%d')
+        return datetime.datetime.strptime(date, SQL_DATETIME_FORMAT)
     else:
         return datetime.datetime.now()
 
 
-def dot_eliminator(text):
+def jobbole_dot_eliminator(text):
     re_match = re.match(r'.*?(\d+).*', text)
     if re_match:
         return int(re_match.group(1))
     else:
         return 0
+
+
+def symbol_eliminator(text):
+    return re.sub(r',', '', text)
 
 
 def word_eliminator(text):

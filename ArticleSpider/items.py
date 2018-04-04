@@ -6,6 +6,7 @@
 # https://doc.scrapy.org/en/latest/topics/items.html
 
 import scrapy
+import datetime
 
 from scrapy.loader import ItemLoader
 from scrapy.loader.processors import Compose, MapCompose, TakeFirst, Join
@@ -35,8 +36,8 @@ class JobboleArticleItem(scrapy.Item):
     )
     content = scrapy.Field()
     votes = scrapy.Field(input_processor=MapCompose(int))
-    bookmarks = scrapy.Field(input_processor=MapCompose(common.dot_eliminator))
-    comments = scrapy.Field(input_processor=MapCompose(common.dot_eliminator))
+    bookmarks = scrapy.Field(input_processor=MapCompose(common.jobbole_dot_eliminator))
+    comments = scrapy.Field(input_processor=MapCompose(common.jobbole_dot_eliminator))
 
     def insert_sql_with_params(self):
         insert_sql = '''
@@ -85,17 +86,20 @@ class ZhihuQuestionItem(scrapy.Item):
     content = scrapy.Field()
     answers = scrapy.Field(
         output_processor=Compose(
-            lambda answers: int(
-                common.get_first(answers)
+            lambda answers:
+            int(
+                common.symbol_eliminator(
+                    common.get_first(answers)
+                )
             )
         )
     )
     comments = scrapy.Field(input_processor=MapCompose(common.word_eliminator))
     follower_and_views = scrapy.Field(output_processor=MapCompose(int))
-    clicks = scrapy.Field()
     crawl_time = scrapy.Field()
 
     def insert_sql_with_params(self):
+        a = self['follower_and_views']
         insert_sql = '''
             INSERT INTO question (
                 question_id,
@@ -107,23 +111,20 @@ class ZhihuQuestionItem(scrapy.Item):
                 comments,
                 follower,
                 views,
-                clicks,
                 crawl_time,
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             '''
         params = (
-            self['front_img_url'][0],
-            self.get('front_img_path'),
+            self['question_id'],
+            self['topics'],
             self['url'],
-            self['url_object_id'],
             self['title'],
-            self['post_date'],
-            self['category'],
-            self['tag'],
             self['content'],
-            self['votes'],
-            self['bookmarks'],
-            self['comments']
+            self['answers'],
+            self['comments'],
+            self['follower_and_views'][0],
+            self['follower_and_views'][1],
+            datetime.datetime.now().strftime(common.SQL_DATETIME_FORMAT),
         )
 
         return insert_sql, params
