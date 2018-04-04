@@ -36,7 +36,7 @@ class ZhihuUser:
         self.multipart_form = MULTIPART_FORM.copy()
         self.session.cookies = LWPCookieJar(filename='./cookie')
 
-    def sign_in(self, username, password, load_cookie=True):
+    def sign_in(self, username, password, load_cookie=False):
         if load_cookie and self._load_cookie():
             return self.online_status()
 
@@ -128,7 +128,7 @@ class ZhihuUser:
 
 
 user = ZhihuUser()
-user.sign_in(ZHIHU_USERNAME, ZHIHU_PASSWORD)
+print(user.sign_in(ZHIHU_USERNAME, ZHIHU_PASSWORD))
 
-with open('index.html', 'wb') as f:
-    f.write(user.session.get('http://www.zhihu.com', headers=HEADERS).text.encode('utf8'))
+# with open('index.html', 'wb') as f:
+#     f.write(user.session.get('http://www.zhihu.com', headers=HEADERS).text.encode('utf8'))

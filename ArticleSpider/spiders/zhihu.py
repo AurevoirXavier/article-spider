@@ -3,6 +3,7 @@ import scrapy
 import re
 import base64
 
+from scrapy import Request, FormRequest
 from time import time
 from ArticleSpider.util.common import hmac_encode
 from PIL import Image
@@ -40,7 +41,7 @@ class ZhihuSpider(scrapy.Spider):
     form_data = FORM_DATA.copy()
 
     def start_requests(self):
-        return [scrapy.Request(self.sign_up_address, headers=self.headers, callback=self._sign_in)]
+        return [Request(self.sign_up_address, headers=self.headers, callback=self._sign_in)]
 
     def _sign_in(self, response):
         headers = self.headers.copy()
@@ -71,7 +72,7 @@ class ZhihuSpider(scrapy.Spider):
             'captcha': ''
         })
 
-        yield scrapy.Request(
+        yield Request(
             self.auth_address,
             headers=headers,
             meta={
@@ -85,24 +86,25 @@ class ZhihuSpider(scrapy.Spider):
         headers = response.meta.get('headers')
 
         if re.search(r'true', response.text):
-            yield scrapy.Request(
+            yield Request(
                 self.auth_address,
                 method='PUT',
                 headers=headers,
                 meta={
                     'headers': headers,
-                    'form_data': self.form_data
-                }
-                , callback=self._get_captcha)
+                    'form_data': response.meta.get('form_data')
+                },
+                callback=self._post_captcha
+            )
         else:
-            yield scrapy.FormRequest(
+            yield FormRequest(
                 url=self.sign_in_address,
                 headers=headers,
                 formdata=response.meta.get('form_data'),
                 callback=self._online_status
             )
 
-    def _get_captcha(self, response):
+    def _post_captcha(self, response):
         headers = response.meta.get('headers')
         form_data = response.meta.get('form_data')
         base64_img = re.findall(
@@ -118,30 +120,35 @@ class ZhihuSpider(scrapy.Spider):
 
         input_text = input('Captcha: ')
 
-        scrapy.FormRequest(
+        form_data.update({
+            'captcha': input_text
+        })
+
+        yield FormRequest(
             url=self.auth_address,
             headers=headers,
             formdata={
                 'input_text': input_text
             },
-            meta=response.meta,
+            meta={
+                'headers': headers,
+                'form_data': form_data
+            },
+            callback=self._auth_with_captcha
         )
 
-        form_data.update({
-            'captcha': input_text
-        })
-
-        yield scrapy.FormRequest(
+    def _auth_with_captcha(self, response):
+        yield FormRequest(
             url=self.sign_in_address,
-            headers=headers,
-            formdata=form_data,
+            headers=response.meta.get('headers'),
+            formdata=response.meta.get('form_data'),
             callback=self._online_status
         )
 
     def _online_status(self, response):
         if response.status == 201:
             for url in self.start_urls:
-                yield scrapy.Request(url, dont_filter=True, headers=self.headers)
+                yield Request(url, dont_filter=True, headers=self.headers)
 
     def parse(self, response):
         pass
