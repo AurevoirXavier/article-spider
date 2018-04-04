@@ -1,5 +1,7 @@
 import hashlib
 import hmac
+import re
+import datetime
 
 from hashlib import sha1
 
@@ -14,6 +16,13 @@ def md5_encode(url):
     return m.hexdigest()
 
 
+def get_first(l, default=None):
+    for first in l:
+        return first
+
+    return default
+
+
 def hmac_encode(grant_type, client_id, source, timestamp):
     signature = hmac.new(b'd1b964811afb40118a12068ff74a12f4', digestmod=sha1)
     signature.update(
@@ -24,3 +33,27 @@ def hmac_encode(grant_type, client_id, source, timestamp):
     )
 
     return signature.hexdigest()
+
+
+def date_convert(text):
+    date = re.sub(r'[ \r\n·]', '', text[0])
+    if date:
+        return datetime.datetime.strptime(date, '%Y-%m-%d')
+    else:
+        return datetime.datetime.now()
+
+
+def dot_eliminator(text):
+    re_match = re.match(r'.*?(\d+).*', text)
+    if re_match:
+        return int(re_match.group(1))
+    else:
+        return 0
+
+
+def word_eliminator(text):
+    re_match = re.match(r'(\d+).*', text)
+    if re_match:
+        return int(re_match.group(1))
+    else:
+        return 0

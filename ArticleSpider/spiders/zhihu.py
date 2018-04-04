@@ -11,8 +11,7 @@ from ArticleSpider.util.common import hmac_encode
 from PIL import Image
 from ArticleSpider.util.secret.secret import ZHIHU_USERNAME, ZHIHU_PASSWORD
 from urllib.parse import urljoin
-from scrapy.loader import ItemLoader
-from ArticleSpider.items import ZhihuAnswerItem, ZhihuQuestionItem
+from ArticleSpider.items import ZhihuAnswerItem, ZhihuQuestionItem, ZhihuQuestionItemLoader
 
 SIGN_UP_ADDRESS = 'https://www.zhihu.com/signup'
 SIGN_IN_ADDRESS = 'https://www.zhihu.com/api/v3/oauth/sign_in'
@@ -187,7 +186,7 @@ class ZhihuSpider(scrapy.Spider):
             response.url
         ).group(2)
 
-        item_loader = ItemLoader(item=ZhihuQuestionItem(), response=response)
+        item_loader = ZhihuQuestionItemLoader(item=ZhihuQuestionItem(), response=response)
         item_loader.add_value('question_id', question_id)
         item_loader.add_css('topics', '.TopicLink .Popover div::text')
         item_loader.add_value('url', response.url)
@@ -195,17 +194,17 @@ class ZhihuSpider(scrapy.Spider):
         item_loader.add_css('content', '.QuestionHeader-detail')
         item_loader.add_css('answers', '.List-headerText span::text')
         item_loader.add_css('comments', '.QuestionHeader-Comment button::text')
-        item_loader.add_css('follower', '.NumberBoard-itemValue::attr(title)')
-        item_loader.add_css('views', '.NumberBoard-itemValue::attr(title)')
+        item_loader.add_css('follower_and_views', '.NumberBoard-itemValue::attr(title)')
 
         yield Request(
             self.answer_api.format(question_id, 20, 0),
             headers=self.headers,
             callback=self.parse_answer
         )
+
         yield item_loader.load_item()
 
-        self.parse(response)
+        # self.parse(response)
 
     def parse_answer(self, response):
         answer_json = json.loads(response.text)

@@ -6,11 +6,10 @@
 # https://doc.scrapy.org/en/latest/topics/items.html
 
 import scrapy
-import re
-import datetime
 
 from scrapy.loader import ItemLoader
 from scrapy.loader.processors import Compose, MapCompose, TakeFirst, Join
+from ArticleSpider.util import common
 
 
 class ArticlespiderItem(scrapy.Item):
@@ -27,9 +26,8 @@ class JobboleArticleItem(scrapy.Item):
     front_img_url = scrapy.Field(output_processor=Compose(list))
     front_img_path = scrapy.Field()
     url = scrapy.Field()
-    url_object_id = scrapy.Field()
     title = scrapy.Field()
-    post_date = scrapy.Field(output_processor=Compose(date_convert))
+    post_date = scrapy.Field(output_processor=Compose(common.date_convert))
     category = scrapy.Field()
     tag = scrapy.Field(
         input_processor=MapCompose(lambda tag: None if '评论' in tag else tag),
@@ -37,8 +35,8 @@ class JobboleArticleItem(scrapy.Item):
     )
     content = scrapy.Field()
     votes = scrapy.Field(input_processor=MapCompose(int))
-    bookmarks = scrapy.Field(input_processor=MapCompose(dot_eliminator))
-    comments = scrapy.Field(input_processor=MapCompose(dot_eliminator))
+    bookmarks = scrapy.Field(input_processor=MapCompose(common.dot_eliminator))
+    comments = scrapy.Field(input_processor=MapCompose(common.dot_eliminator))
 
     def insert_sql_with_params(self):
         insert_sql = '''
@@ -46,7 +44,7 @@ class JobboleArticleItem(scrapy.Item):
                 front_img_url,
                 front_img_path,
                 url,
-                url_object_id,
+                url_id,
                 title,
                 post_date,
                 category,
@@ -61,7 +59,7 @@ class JobboleArticleItem(scrapy.Item):
             self['front_img_url'][0],
             self.get('front_img_path'),
             self['url'],
-            self['url_object_id'],
+            common.md5_encode(self['url']),
             self['title'],
             self['post_date'],
             self['category'],
@@ -75,16 +73,25 @@ class JobboleArticleItem(scrapy.Item):
         return insert_sql, params
 
 
+class ZhihuQuestionItemLoader(ItemLoader):
+    default_output_processor = TakeFirst()
+
+
 class ZhihuQuestionItem(scrapy.Item):
     question_id = scrapy.Field(input_processor=MapCompose(int))
     topics = scrapy.Field(output_processor=Join(','))
     url = scrapy.Field()
     title = scrapy.Field()
     content = scrapy.Field()
-    answers = scrapy.Field()
-    comments = scrapy.Field(input_processor=MapCompose(word_eliminator))
-    follower = scrapy.Field()
-    views = scrapy.Field()
+    answers = scrapy.Field(
+        output_processor=Compose(
+            lambda answers: int(
+                common.get_first(answers)
+            )
+        )
+    )
+    comments = scrapy.Field(input_processor=MapCompose(common.word_eliminator))
+    follower_and_views = scrapy.Field(output_processor=MapCompose(int))
     clicks = scrapy.Field()
     crawl_time = scrapy.Field()
 
