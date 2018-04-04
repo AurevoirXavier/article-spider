@@ -2,6 +2,8 @@
 import scrapy
 import re
 import base64
+import json
+import datetime
 
 from scrapy import Request, FormRequest
 from time import time
@@ -43,6 +45,15 @@ class ZhihuSpider(scrapy.Spider):
     headers = HEADERS.copy()
     form_data = FORM_DATA.copy()
 
+    answer_api = 'https://www.zhihu.com/api/v4/questions/{0}/answers?sort_by=default&include=data%5B%2A%5D' \
+                 '.is_normal%2Cadmin_closed_comment%2Creward_info%2Cis_collapsed%2Cannotation_action' \
+                 '%2Cannotation_detail%2Ccollapse_reason%2Cis_sticky%2Ccollapsed_by%2Csuggest_edit%2Ccomment_count' \
+                 '%2Ccan_comment%2Ccontent%2Ceditable_content%2Cvoteup_count%2Creshipment_settings' \
+                 '%2Ccomment_permission%2Ccreated_time%2Cupdated_time%2Creview_info%2Crelevant_info%2Cquestion' \
+                 '%2Cexcerpt%2Crelationship.is_authorized%2Cis_author%2Cvoting%2Cis_thanked%2Cis_nothelp' \
+                 '%2Cupvoted_followees%3Bdata%5B%2A%5D.mark_infos%5B%2A%5D.url%3Bdata%5B%2A%5D.author.follower_count' \
+                 '%2Cbadge%5B%3F%28type%3Dbest_answerer%29%5D.topics&limit={1}&offset={2}'
+
     def start_requests(self):
         return [Request(self.sign_up_address, headers=self.headers, callback=self._sign_in)]
 
@@ -55,7 +66,7 @@ class ZhihuSpider(scrapy.Spider):
             'Accept-Language': 'en-us',
             'DNT': '1',
             'authorization': 'oauth c3cef7c66a1843f8b3a9e6a1e3160e20',
-            'X-Xsrftoken': re.search(
+            'X-Xsrftoken': re.match(
                 r'_xsrf=([\w|-]+)',
                 response.headers.getlist(b'Set-Cookie')[1].decode('utf8')
             ).group(1)
@@ -167,8 +178,56 @@ class ZhihuSpider(scrapy.Spider):
                     headers=self.headers,
                     callback=self.parse_question
                 )
+            else:
+                yield Request(url, headers=self.headers, callback=self.parse)
 
     def parse_question(self, response):
+        question_id = re.match(
+            r'(.*zhihu.com/question/(\d+))(/|$).*',
+            response.url
+        ).group(2)
+
         item_loader = ItemLoader(item=ZhihuQuestionItem(), response=response)
-        item_loader.add_css()
-        pass
+        item_loader.add_value('question_id', question_id)
+        item_loader.add_css('topics', '.TopicLink .Popover div::text')
+        item_loader.add_value('url', response.url)
+        item_loader.add_css('title', 'h1.QuestionHeader-title::text')
+        item_loader.add_css('content', '.QuestionHeader-detail')
+        item_loader.add_css('answers', '.List-headerText span::text')
+        item_loader.add_css('comments', '.QuestionHeader-Comment button::text')
+        item_loader.add_css('follower', '.NumberBoard-itemValue::attr(title)')
+        item_loader.add_css('views', '.NumberBoard-itemValue::attr(title)')
+
+        yield Request(
+            self.answer_api.format(question_id, 20, 0),
+            headers=self.headers,
+            callback=self.parse_answer
+        )
+        yield item_loader.load_item()
+
+        self.parse(response)
+
+    def parse_answer(self, response):
+        answer_json = json.loads(response.text)
+
+        for answer in answer_json['data']:
+            answer_item = ZhihuAnswerItem()
+            answer_item['answer_id'] = answer['id']
+            answer_item['url'] = answer['url']
+            answer_item['question_id'] = answer['question']['id']
+            answer_item['author_id'] = int(answer['author']['id'])
+            answer_item['content'] = answer['content'] if 'content' in answer else answer['excerpt']
+            answer_item['votes'] = answer['voteup_count']
+            answer_item['comments'] = answer['comment_count']
+            answer_item['created_time'] = answer['created_time']
+            answer_item['updated_time'] = answer['updated_time']
+            answer_item['crawl_time'] = datetime.datetime.now()
+
+            yield answer_item
+
+        if not answer_json['paging']['is_end']:
+            yield Request(
+                answer_json['paging']['next'],
+                headers=self.headers,
+                callback=self.parse_answer
+            )

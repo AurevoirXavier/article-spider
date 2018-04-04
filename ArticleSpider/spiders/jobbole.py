@@ -5,11 +5,12 @@ from scrapy.http import Request
 from urllib.parse import urljoin
 
 from ArticleSpider.items import ArticleItemLoader, JobboleArticleItem
+from ArticleSpider.util.common import md5_encode
 
 
 class ArticlespiderPipeline(object):
     def process_item(self, item, spider):
-        return item 
+        return item
 
 
 class JobboleSpider(scrapy.Spider):
@@ -37,7 +38,7 @@ class JobboleSpider(scrapy.Spider):
         item_loader = ArticleItemLoader(item=JobboleArticleItem(), response=response)
         item_loader.add_value('front_img_url', response.meta.get('front_img_url', ''))
         item_loader.add_value('url', response.url)
-        item_loader.add_value('url_object_id', response.url)
+        item_loader.add_value('url_object_id', md5_encode(response.url))
         item_loader.add_css('title', '.entry-header h1::text')
         item_loader.add_css('post_date', '.entry-meta-hide-on-mobile::text')
         item_loader.add_css('category', '.entry-meta-hide-on-mobile a[rel="category tag"]::text')
@@ -47,6 +48,4 @@ class JobboleSpider(scrapy.Spider):
         item_loader.add_css('bookmarks', '.bookmark-btn::text')
         item_loader.add_css('comments', 'a[href="#article-comment"] span::text')
 
-        article_item = item_loader.load_item()
-
-        yield article_item
+        yield item_loader.load_item()

@@ -67,34 +67,6 @@ class PostgreSQLTwistedPipeline:
         print(failure)
 
     def insert(self, cursor, item):
-        insert_sql = '''
-                INSERT INTO article (
-                    front_img_url,
-                    front_img_path,
-                    url,
-                    url_object_id,
-                    title,
-                    post_date,
-                    category,
-                    tag,
-                    content,
-                    votes,
-                    bookmarks,
-                    comments
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                '''
+        sql, params = item.insert_sql_with_params()
 
-        cursor.execute(insert_sql, (
-            item['front_img_url'][0],
-            item.get('front_img_path'),
-            item['url'],
-            item['url_object_id'],
-            item['title'],
-            item['post_date'],
-            item['category'],
-            item['tag'],
-            item['content'],
-            item['votes'],
-            item['bookmarks'],
-            item['comments']
-        ))
+        cursor.execute(sql, params)
