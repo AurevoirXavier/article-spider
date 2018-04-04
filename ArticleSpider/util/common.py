@@ -41,7 +41,7 @@ def hmac_encode(grant_type, client_id, source, timestamp):
 def date_convert(text):
     date = re.sub(r'[ \r\n·]', '', text[0])
     if date:
-        return datetime.datetime.strptime(date, SQL_DATE_FORMAT)
+        return datetime.datetime.strptime(date, '%Y/%m/%d')
     else:
         return datetime.datetime.now()
 
