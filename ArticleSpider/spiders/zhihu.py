@@ -179,7 +179,7 @@ class ZhihuSpider(scrapy.Spider):
                 )
             else:
                 pass
-                # yield Request(url, headers=self.headers, callback=self.parse)
+                yield Request(url, headers=self.headers, callback=self.parse)
 
     def parse_question(self, response):
         question_id = re.match(
@@ -197,13 +197,12 @@ class ZhihuSpider(scrapy.Spider):
         zhihu_question_item_loader.add_css('comments', '.QuestionHeader-Comment button::text')
         zhihu_question_item_loader.add_css('follower_and_views', '.NumberBoard-itemValue::attr(title)')
 
-        # yield Request(
-        #     self.answer_api.format(question_id, 20, 0),
-        #     headers=self.headers,
-        #     callback=self.parse_answer
-        # )
-        a = zhihu_question_item_loader.load_item()
-        yield a
+        yield Request(
+            self.answer_api.format(question_id, 20, 0),
+            headers=self.headers,
+            callback=self.parse_answer
+        )
+        yield zhihu_question_item_loader.load_item()
 
         # self.parse(response)
 
