@@ -11,7 +11,6 @@ from PIL import Image
 from ArticleSpider.util.secret.secret import ZHIHU_USERNAME, ZHIHU_PASSWORD
 from urllib.parse import urljoin
 from ArticleSpider.items import ZhihuAnswerItem, ZhihuQuestionItem, ZhihuQuestionItemLoader
-from parsel import selector
 
 SIGN_UP_ADDRESS = 'https://www.zhihu.com/signup'
 SIGN_IN_ADDRESS = 'https://www.zhihu.com/api/v3/oauth/sign_in'
@@ -173,15 +172,13 @@ class ZhihuSpider(scrapy.Spider):
             re_match = re.match(r'(.*zhihu.com/question/(\d+))(/|$).*', url)
             if re_match:
                 yield Request(
-                    'https://www.zhihu.com/question/271153956',
-                    # re_match.group(1),
+                    re_match.group(1),
                     headers=self.headers,
                     callback=self.parse_question
                 )
                 break
             else:
-                # yield Request(url, headers=self.headers, callback=self.parse)
-                pass
+                yield Request(url, headers=self.headers, callback=self.parse)
 
     def parse_question(self, response):
         question_id = re.match(
@@ -216,7 +213,7 @@ class ZhihuSpider(scrapy.Spider):
             callback=self.parse_answer
         )
 
-        # self.parse(response)
+        self.parse(response)
 
     def parse_answer(self, response):
         answer_json = json.loads(response.text)
@@ -254,27 +251,27 @@ class ZhihuSpider(scrapy.Spider):
                     callback=self.parse_log
                 )
 
-        # for answer in answer_json['data']:
-        #     answer_item = ZhihuAnswerItem()
-        #     answer_item['answer_id'] = answer['id']
-        #     answer_item['url'] = answer['url']
-        #     answer_item['question_id'] = answer['question']['id']
-        #     answer_item['author_id'] = answer['author']['id']
-        #     answer_item['content'] = answer['content'] if 'content' in answer else answer['excerpt']
-        #     answer_item['votes'] = answer['voteup_count']
-        #     answer_item['comments'] = answer['comment_count']
-        #     answer_item['created_time'] = answer['created_time']
-        #     answer_item['updated_time'] = answer['updated_time']
-        #     answer_item['crawl_time'] = now()
-        #
-        #     yield answer_item
-        #
-        # if not answer_json['paging']['is_end']:
-        #     yield Request(
-        #         answer_json['paging']['next'],
-        #         headers=self.headers,
-        #         callback=self.parse_answer
-        #     )
+        for answer in answer_json['data']:
+            answer_item = ZhihuAnswerItem()
+            answer_item['answer_id'] = answer['id']
+            answer_item['url'] = answer['url']
+            answer_item['question_id'] = answer['question']['id']
+            answer_item['author_id'] = answer['author']['id']
+            answer_item['content'] = answer['content'] if 'content' in answer else answer['excerpt']
+            answer_item['votes'] = answer['voteup_count']
+            answer_item['comments'] = answer['comment_count']
+            answer_item['created_time'] = answer['created_time']
+            answer_item['updated_time'] = answer['updated_time']
+            answer_item['crawl_time'] = now()
+
+            yield answer_item
+
+        if not answer_json['paging']['is_end']:
+            yield Request(
+                answer_json['paging']['next'],
+                headers=self.headers,
+                callback=self.parse_answer
+            )
 
     def parse_log(self, response):
         item = response.meta.get('loader')

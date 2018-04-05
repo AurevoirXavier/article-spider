@@ -54,6 +54,10 @@ class JobboleArticleItem(scrapy.Item):
                 bookmarks,
                 comments
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (url_id) DO UPDATE
+                SET votes = excluded.votes,
+                    bookmarks = excluded.bookmarks,
+                    comments = excluded.comments
             '''
         params = (
             self['front_img_url'][0],
@@ -111,6 +115,14 @@ class ZhihuQuestionItem(scrapy.Item):
                 updated_time,
                 crawl_time
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (answer_id) DO UPDATE
+                SET content = excluded.content,
+                    answers = excluded.answers,
+                    comments = excluded.comments,
+                    follower = excluded.follower,
+                    views = excluded.views,
+                    updated_time = excluded.updated_time,
+                    crawl_updated_time = excluded.crawl_time
             '''
         params = (
             self['question_id'],
