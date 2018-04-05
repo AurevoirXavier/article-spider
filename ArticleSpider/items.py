@@ -88,13 +88,15 @@ class ZhihuQuestionItem(scrapy.Item):
             lambda answers:
             int(
                 common.symbol_eliminator(
-                    common.get_first(answers)
+                    common.take_first(answers)
                 )
             )
         )
     )
     comments = scrapy.Field(input_processor=MapCompose(common.word_eliminator))
     follower_and_views = scrapy.Field(output_processor=MapCompose(int))
+    created_time = scrapy.Field()
+    updated_time = scrapy.Field()
     crawl_time = scrapy.Field()
 
     def insert_sql_with_params(self):
@@ -109,8 +111,10 @@ class ZhihuQuestionItem(scrapy.Item):
                 comments,
                 follower,
                 views,
+                created_time,
+                updated_time,
                 crawl_time
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             '''
         params = (
             self['question_id'],
@@ -122,6 +126,8 @@ class ZhihuQuestionItem(scrapy.Item):
             self['comments'],
             self['follower_and_views'][0],
             self['follower_and_views'][1],
+            self['created_time'],
+            self['updated_time'],
             self['crawl_time']
         )
 

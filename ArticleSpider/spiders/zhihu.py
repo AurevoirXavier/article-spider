@@ -6,7 +6,7 @@ import json
 
 from scrapy import Request, FormRequest
 from time import time
-from ArticleSpider.util.common import hmac_encode, now
+from ArticleSpider.util.common import hmac_encode, now, format_timestamp, take_first
 from PIL import Image
 from ArticleSpider.util.secret.secret import ZHIHU_USERNAME, ZHIHU_PASSWORD
 from urllib.parse import urljoin
@@ -198,36 +198,79 @@ class ZhihuSpider(scrapy.Spider):
         zhihu_question_item_loader.add_css('follower_and_views', '.NumberBoard-itemValue::attr(title)')
         zhihu_question_item_loader.add_value('crawl_time', now())
 
-        # yield Request(
-        #     self.answer_api.format(question_id, 20, 0),
-        #     headers=self.headers,
-        #     callback=self.parse_answer
-        # )
-        yield zhihu_question_item_loader.load_item()
+        yield Request(
+            self.answer_api.format(question_id, 20, 0),
+            headers=self.headers,
+            meta={
+                'loader': zhihu_question_item_loader
+            },
+            callback=self.parse_answer
+        )
 
         # self.parse(response)
 
     def parse_answer(self, response):
         answer_json = json.loads(response.text)
 
-        for answer in answer_json['data']:
-            answer_item = ZhihuAnswerItem()
-            answer_item['answer_id'] = answer['id']
-            answer_item['url'] = answer['url']
-            answer_item['question_id'] = answer['question']['id']
-            answer_item['author_id'] = answer['author']['id']
-            answer_item['content'] = answer['content'] if 'content' in answer else answer['excerpt']
-            answer_item['votes'] = answer['voteup_count']
-            answer_item['comments'] = answer['comment_count']
-            answer_item['created_time'] = answer['created_time']
-            answer_item['updated_time'] = answer['updated_time']
-            answer_item['crawl_time'] = now()
+        if response.meta:
+            loader = response.meta.get('loader')
 
-            yield answer_item
+            for answer in [take_first(answer_json['data'], default=[])]:
+                loader.add_value(
+                    'created_time',
+                    format_timestamp(
+                        answer['question']['created']
+                    )
+                )
+                loader.add_value(
+                    'updated_time',
+                    format_timestamp(
+                        answer['question']['updated_time']
+                    )
+                )
 
-        if not answer_json['paging']['is_end']:
-            yield Request(
-                answer_json['paging']['next'],
-                headers=self.headers,
-                callback=self.parse_answer
-            )
+                yield loader.load_item()
+            else:
+                yield Request(
+                    loader._values['url'][0] + '/log',
+                    headers=self.headers,
+                    meta={
+                        'loader': loader
+                    },
+                    callback=self.parse_log
+                )
+
+        # for answer in answer_json['data']:
+        #     answer_item = ZhihuAnswerItem()
+        #     answer_item['answer_id'] = answer['id']
+        #     answer_item['url'] = answer['url']
+        #     answer_item['question_id'] = answer['question']['id']
+        #     answer_item['author_id'] = answer['author']['id']
+        #     answer_item['content'] = answer['content'] if 'content' in answer else answer['excerpt']
+        #     answer_item['votes'] = answer['voteup_count']
+        #     answer_item['comments'] = answer['comment_count']
+        #     answer_item['created_time'] = answer['created_time']
+        #     answer_item['updated_time'] = answer['updated_time']
+        #     answer_item['crawl_time'] = now()
+        #
+        #     yield answer_item
+        #
+        # if not answer_json['paging']['is_end']:
+        #     yield Request(
+        #         answer_json['paging']['next'],
+        #         headers=self.headers,
+        #         callback=self.parse_answer
+        #     )
+
+    def parse_log(self, response):
+        loader = response.meta.get('loader')
+        loader.add_css(
+            'created_time',
+            '#zh-question-log-list-wrap'
+        )
+        loader.add_css(
+            'updated_time',
+            '#zh-question-log-list-wrap'
+        )
+
+        yield loader.load_item()

@@ -19,7 +19,7 @@ def md5_encode(url):
     return m.hexdigest()
 
 
-def get_first(l, default=None):
+def take_first(l, default=None):
     for first in l:
         return first
 
