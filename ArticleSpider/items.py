@@ -83,17 +83,13 @@ class ZhihuQuestionItem(scrapy.Item):
     url = scrapy.Field()
     title = scrapy.Field()
     content = scrapy.Field()
-    answers = scrapy.Field(
-        output_processor=Compose(
-            lambda answers:
-            int(
-                common.symbol_eliminator(
-                    common.take_first(answers)
-                )
-            )
+    answers = scrapy.Field()
+    comments = scrapy.Field(
+        input_processor=MapCompose(
+            lambda comments:
+            common.word_eliminator(comments) if comments else 0
         )
     )
-    comments = scrapy.Field(input_processor=MapCompose(common.word_eliminator))
     follower_and_views = scrapy.Field(output_processor=MapCompose(int))
     created_time = scrapy.Field()
     updated_time = scrapy.Field()

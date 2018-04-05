@@ -173,7 +173,7 @@ class ZhihuSpider(scrapy.Spider):
             re_match = re.match(r'(.*zhihu.com/question/(\d+))(/|$).*', url)
             if re_match:
                 yield Request(
-                    'https://www.zhihu.com/question/271138184',
+                    'https://www.zhihu.com/question/271153956',
                     # re_match.group(1),
                     headers=self.headers,
                     callback=self.parse_question
@@ -195,7 +195,14 @@ class ZhihuSpider(scrapy.Spider):
         zhihu_question_item_loader.add_value('url', response.url)
         zhihu_question_item_loader.add_css('title', 'h1.QuestionHeader-title::text')
         zhihu_question_item_loader.add_css('content', '.QuestionHeader-detail')
-        zhihu_question_item_loader.add_css('answers', '.List-headerText span::text')
+        zhihu_question_item_loader.add_value(
+            'answers',
+            int(
+                response.css(
+                    '.List-headerText span::text'
+                ).extract_first(0)
+            )
+        )
         zhihu_question_item_loader.add_css('comments', '.QuestionHeader-Comment button::text')
         zhihu_question_item_loader.add_css('follower_and_views', '.NumberBoard-itemValue::attr(title)')
         zhihu_question_item_loader.add_value('crawl_time', now())
@@ -272,14 +279,11 @@ class ZhihuSpider(scrapy.Spider):
     def parse_log(self, response):
         item = response.meta.get('loader')
 
-        created_time = response.css(
+        item._values['created_time'] = response.css(
             '#zh-question-log-list-wrap>:last-child time::text'
-        ).extract()
-        updated_time = response.css(
+        ).extract_first()
+        item._values['updated_time'] = response.css(
             '#zh-question-log-list-wrap>:first-child time::text'
-        ).root
-
-        item._values['created_time'] = created_time
-        item._values['updated_time'] = updated_time
+        ).extract_first()
 
         yield item
