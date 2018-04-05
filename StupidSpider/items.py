@@ -9,10 +9,10 @@ import scrapy
 
 from scrapy.loader import ItemLoader
 from scrapy.loader.processors import Compose, MapCompose, TakeFirst, Join
-from ArticleSpider.util import common
+from StupidSpider.util import common
 
 
-class ArticlespiderItem(scrapy.Item):
+class StupidspiderItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
     pass

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
 
-from ArticleSpider.util.secret import secret
+from StupidSpider.util.secret import secret
 
-# Scrapy settings for ArticleSpider project
+# Scrapy settings for StupidSpider project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -12,13 +12,13 @@ from ArticleSpider.util.secret import secret
 #     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'ArticleSpider'
+BOT_NAME = 'StupidSpider'
 
-SPIDER_MODULES = ['ArticleSpider.spiders']
-NEWSPIDER_MODULE = 'ArticleSpider.spiders'
+SPIDER_MODULES = ['StupidSpider.spiders']
+NEWSPIDER_MODULE = 'StupidSpider.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-# USER_AGENT = 'ArticleSpider (+http://www.yourdomain.com)'
+# USER_AGENT = 'StupidSpider (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
@@ -49,13 +49,13 @@ ROBOTSTXT_OBEY = False
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 # SPIDER_MIDDLEWARES = {
-#    'ArticleSpider.middlewares.ArticlespiderSpiderMiddleware': 543,
+#    'StupidSpider.middlewares.StupidspiderSpiderMiddleware': 543,
 # }
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 # DOWNLOADER_MIDDLEWARES = {
-#    'ArticleSpider.middlewares.ArticlespiderDownloaderMiddleware': 543,
+#    'StupidSpider.middlewares.StupidspiderDownloaderMiddleware': 543,
 # }
 
 # Enable or disable extensions
@@ -67,9 +67,9 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    # 'ArticleSpider.pipelines.ArticleImgPipeline': 1,
-    # 'ArticleSpider.pipelines.JsonExporterPipeline': 2,
-    'ArticleSpider.pipelines.PostgreSQLTwistedPipeline': 3,
+    # 'StupidSpider.pipelines.ArticleImgPipeline': 1,
+    # 'StupidSpider.pipelines.JsonExporterPipeline': 2,
+    'StupidSpider.pipelines.PostgreSQLTwistedPipeline': 3,
 }
 
 IMAGES_URLS_FIELD = 'front_img_url'
