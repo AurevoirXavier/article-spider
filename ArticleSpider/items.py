@@ -115,7 +115,7 @@ class ZhihuQuestionItem(scrapy.Item):
                 updated_time,
                 crawl_time
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            ON CONFLICT (answer_id) DO UPDATE
+            ON CONFLICT (question_id) DO UPDATE
                 SET content = excluded.content,
                     answers = excluded.answers,
                     comments = excluded.comments,

@@ -6,7 +6,7 @@ import json
 
 from scrapy import Request, FormRequest
 from time import time
-from ArticleSpider.util.common import hmac_encode, now, format_timestamp, take_first
+from ArticleSpider.util.common import hmac_encode, now, format_timestamp, take_first, symbol_eliminator
 from PIL import Image
 from ArticleSpider.util.secret.secret import ZHIHU_USERNAME, ZHIHU_PASSWORD
 from urllib.parse import urljoin
@@ -178,7 +178,8 @@ class ZhihuSpider(scrapy.Spider):
                 )
                 break
             else:
-                yield Request(url, headers=self.headers, callback=self.parse)
+                pass
+                # yield Request(url, headers=self.headers, callback=self.parse)
 
     def parse_question(self, response):
         question_id = re.match(
@@ -195,9 +196,11 @@ class ZhihuSpider(scrapy.Spider):
         zhihu_question_item_loader.add_value(
             'answers',
             int(
-                response.css(
-                    '.List-headerText span::text'
-                ).extract_first(0)
+                symbol_eliminator(
+                    response.css(
+                        '.List-headerText span::text'
+                    ).extract_first(0)
+                )
             )
         )
         zhihu_question_item_loader.add_css('comments', '.QuestionHeader-Comment button::text')
@@ -213,20 +216,17 @@ class ZhihuSpider(scrapy.Spider):
             callback=self.parse_answer
         )
 
-        self.parse(response)
+        # self.parse(response)
 
     def parse_answer(self, response):
         answer_json = json.loads(response.text)
 
-        if response.meta:
+        if response.meta.get('loader'):
             loader = response.meta.get('loader')
 
-            for answer in list(
-                    take_first(
-                        answer_json['data'],
-                        default=()
-                    )
-            ):
+            if answer_json['data']:
+                answer = take_first(answer_json['data'])
+
                 loader.add_value(
                     'created_time',
                     format_timestamp(
