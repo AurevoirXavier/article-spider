@@ -11,6 +11,7 @@ from PIL import Image
 from ArticleSpider.util.secret.secret import ZHIHU_USERNAME, ZHIHU_PASSWORD
 from urllib.parse import urljoin
 from ArticleSpider.items import ZhihuAnswerItem, ZhihuQuestionItem, ZhihuQuestionItemLoader
+from parsel import selector
 
 SIGN_UP_ADDRESS = 'https://www.zhihu.com/signup'
 SIGN_IN_ADDRESS = 'https://www.zhihu.com/api/v3/oauth/sign_in'
@@ -172,7 +173,8 @@ class ZhihuSpider(scrapy.Spider):
             re_match = re.match(r'(.*zhihu.com/question/(\d+))(/|$).*', url)
             if re_match:
                 yield Request(
-                    re_match.group(1),
+                    'https://www.zhihu.com/question/271138184',
+                    # re_match.group(1),
                     headers=self.headers,
                     callback=self.parse_question
                 )
@@ -215,7 +217,12 @@ class ZhihuSpider(scrapy.Spider):
         if response.meta:
             loader = response.meta.get('loader')
 
-            for answer in [take_first(answer_json['data'], default=[])]:
+            for answer in list(
+                    take_first(
+                        answer_json['data'],
+                        default=()
+                    )
+            ):
                 loader.add_value(
                     'created_time',
                     format_timestamp(
@@ -235,7 +242,7 @@ class ZhihuSpider(scrapy.Spider):
                     loader._values['url'][0] + '/log',
                     headers=self.headers,
                     meta={
-                        'loader': loader
+                        'loader': loader.load_item()
                     },
                     callback=self.parse_log
                 )
@@ -263,14 +270,16 @@ class ZhihuSpider(scrapy.Spider):
         #     )
 
     def parse_log(self, response):
-        loader = response.meta.get('loader')
-        loader.add_css(
-            'created_time',
-            '#zh-question-log-list-wrap'
-        )
-        loader.add_css(
-            'updated_time',
-            '#zh-question-log-list-wrap'
-        )
+        item = response.meta.get('loader')
 
-        yield loader.load_item()
+        created_time = response.css(
+            '#zh-question-log-list-wrap>:last-child time::text'
+        ).extract()
+        updated_time = response.css(
+            '#zh-question-log-list-wrap>:first-child time::text'
+        ).root
+
+        item._values['created_time'] = created_time
+        item._values['updated_time'] = updated_time
+
+        yield item
