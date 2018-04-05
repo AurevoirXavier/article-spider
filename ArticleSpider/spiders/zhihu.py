@@ -178,8 +178,7 @@ class ZhihuSpider(scrapy.Spider):
                 )
                 break
             else:
-                pass
-                # yield Request(url, headers=self.headers, callback=self.parse)
+                yield Request(url, headers=self.headers, callback=self.parse)
 
     def parse_question(self, response):
         question_id = re.match(
@@ -199,7 +198,7 @@ class ZhihuSpider(scrapy.Spider):
                 symbol_eliminator(
                     response.css(
                         '.List-headerText span::text'
-                    ).extract_first(0)
+                    ).extract_first('0')
                 )
             )
         )
@@ -216,7 +215,7 @@ class ZhihuSpider(scrapy.Spider):
             callback=self.parse_answer
         )
 
-        # self.parse(response)
+        self.parse(response)
 
     def parse_answer(self, response):
         answer_json = json.loads(response.text)
