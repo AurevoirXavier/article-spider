@@ -3,11 +3,10 @@ import scrapy
 import re
 import base64
 import json
-import datetime
 
 from scrapy import Request, FormRequest
 from time import time
-from ArticleSpider.util.common import hmac_encode
+from ArticleSpider.util.common import hmac_encode, now
 from PIL import Image
 from ArticleSpider.util.secret.secret import ZHIHU_USERNAME, ZHIHU_PASSWORD
 from urllib.parse import urljoin
@@ -197,13 +196,14 @@ class ZhihuSpider(scrapy.Spider):
         zhihu_question_item_loader.add_css('answers', '.List-headerText span::text')
         zhihu_question_item_loader.add_css('comments', '.QuestionHeader-Comment button::text')
         zhihu_question_item_loader.add_css('follower_and_views', '.NumberBoard-itemValue::attr(title)')
+        zhihu_question_item_loader.add_value('crawl_time', now())
 
-        yield Request(
-            self.answer_api.format(question_id, 20, 0),
-            headers=self.headers,
-            callback=self.parse_answer
-        )
-        # yield zhihu_question_item_loader.load_item()
+        # yield Request(
+        #     self.answer_api.format(question_id, 20, 0),
+        #     headers=self.headers,
+        #     callback=self.parse_answer
+        # )
+        yield zhihu_question_item_loader.load_item()
 
         # self.parse(response)
 
@@ -221,7 +221,7 @@ class ZhihuSpider(scrapy.Spider):
             answer_item['comments'] = answer['comment_count']
             answer_item['created_time'] = answer['created_time']
             answer_item['updated_time'] = answer['updated_time']
-            answer_item['crawl_time'] = datetime.datetime.now()
+            answer_item['crawl_time'] = now()
 
             yield answer_item
 

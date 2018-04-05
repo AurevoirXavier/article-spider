@@ -6,7 +6,6 @@
 # https://doc.scrapy.org/en/latest/topics/items.html
 
 import scrapy
-import datetime
 
 from scrapy.loader import ItemLoader
 from scrapy.loader.processors import Compose, MapCompose, TakeFirst, Join
@@ -123,7 +122,7 @@ class ZhihuQuestionItem(scrapy.Item):
             self['comments'],
             self['follower_and_views'][0],
             self['follower_and_views'][1],
-            datetime.datetime.now().strftime(common.SQL_DATETIME_FORMAT)
+            self['crawl_time']
         )
 
         return insert_sql, params
@@ -155,6 +154,12 @@ class ZhihuAnswerItem(scrapy.Item):
                 updated_time,
                 crawl_time
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (answer_id) DO UPDATE
+                SET content = excluded.content,
+                    votes = excluded.votes,
+                    comments = excluded.comments,
+                    updated_time = excluded.updated_time,
+                    crawl_updated_time = excluded.crawl_time
             '''
         params = (
             self['answer_id'],
@@ -166,7 +171,7 @@ class ZhihuAnswerItem(scrapy.Item):
             self['comments'],
             common.format_timestamp(self['created_time']),
             common.format_timestamp(self['updated_time']),
-            self['crawl_time'].strftime(common.SQL_DATETIME_FORMAT)
+            self['crawl_time']
         )
 
         return insert_sql, params

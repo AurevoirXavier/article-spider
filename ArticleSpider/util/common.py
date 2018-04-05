@@ -70,3 +70,9 @@ def format_timestamp(timestamp):
     return datetime.datetime \
         .fromtimestamp(timestamp) \
         .strftime(SQL_DATETIME_FORMAT)
+
+
+def now():
+    return datetime.datetime \
+        .now() \
+        .strftime(SQL_DATETIME_FORMAT)
