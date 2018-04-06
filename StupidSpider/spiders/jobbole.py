@@ -4,7 +4,7 @@ import scrapy
 from scrapy.http import Request
 from urllib.parse import urljoin
 
-from StupidSpider.items import ArticleItemLoader, JobboleArticleItem
+from items import ArticleItemLoader, JobboleArticleItem
 
 
 class JobboleSpider(scrapy.Spider):
