@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+# import sys
 
 from StupidSpider.util.secret import secret
 
@@ -73,8 +74,24 @@ ITEM_PIPELINES = {
 }
 
 IMAGES_URLS_FIELD = 'front_img_url'
-project_dir = os.path.abspath(os.path.dirname(__file__))
-IMAGES_STORE = os.path.join(project_dir, 'img')
+IMAGES_STORE = os.path.join(
+    os.path.abspath(
+        os.path.dirname(__file__)
+    ),
+    'img'
+)
+
+# sys.path.insert(
+#     0,
+#     os.path.join(
+#         os.path.dirname(
+#             os.path.abspath(
+#                 os.path.dirname(__file__)
+#             )
+#         ),
+#         'StupidSpider'
+#     )
+# )
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
