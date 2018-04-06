@@ -9,7 +9,7 @@ import scrapy
 
 from scrapy.loader import ItemLoader
 from scrapy.loader.processors import Compose, MapCompose, TakeFirst, Join
-from util import common
+from StupidSpider.util import common
 
 
 class StupidspiderItem(scrapy.Item):

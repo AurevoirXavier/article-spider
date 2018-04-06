@@ -6,11 +6,11 @@ import json
 
 from scrapy import Request, FormRequest
 from time import time
-from util.common import hmac_encode, now, format_timestamp, take_first, symbol_eliminator
+from StupidSpider.util.common import hmac_encode, now, format_timestamp, take_first, symbol_eliminator
 from PIL import Image
-from util.secret.secret import ZHIHU_USERNAME, ZHIHU_PASSWORD
+from StupidSpider.util.secret.secret import ZHIHU_USERNAME, ZHIHU_PASSWORD
 from urllib.parse import urljoin
-from items import ZhihuAnswerItem, ZhihuQuestionItem, ZhihuQuestionItemLoader
+from StupidSpider.items import ZhihuAnswerItem, ZhihuQuestionItem, ZhihuQuestionItemLoader
 
 SIGN_UP_ADDRESS = 'https://www.zhihu.com/signup'
 SIGN_IN_ADDRESS = 'https://www.zhihu.com/api/v3/oauth/sign_in'

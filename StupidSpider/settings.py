@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-from util.secret import secret
+from StupidSpider.util.secret import secret
 
 # Scrapy settings for StupidSpider project
 #
