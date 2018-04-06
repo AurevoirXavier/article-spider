@@ -2,9 +2,9 @@
 import psycopg2
 import psycopg2.extras
 
-from scrapy.pipelines.images import ImagesPipeline
-from scrapy.exporters import JsonItemExporter
 from twisted.enterprise import adbapi
+from scrapy.exporters import JsonItemExporter
+from scrapy.pipelines.images import ImagesPipeline
 
 
 # Define your item pipelines here
