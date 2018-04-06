@@ -7,11 +7,19 @@ from scrapy.spiders import CrawlSpider, Rule
 class LagouSpider(CrawlSpider):
     name = 'lagou'
     allowed_domains = ['www.lagou.com']
-    start_urls = ['http://www.lagou.com/']
+    start_urls = ['https://www.lagou.com/']
 
     rules = (
-        Rule(LinkExtractor(allow=r'Items/'), callback='parse_item', follow=True),
+        Rule(LinkExtractor(allow=r'zhaoping/.*'), follow=True),
+        Rule(LinkExtractor(allow=r'gongsi/d+.html'), follow=True),
+        Rule(LinkExtractor(allow=r'jobs/d+.html'), callback='parse_item', follow=True)
     )
+
+    def parse_start_url(self, response):
+        return []
+
+    def process_results(self, response, results):
+        return []
 
     def parse_item(self, response):
         i = {}
