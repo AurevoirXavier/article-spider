@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re
 import json
 import scrapy
@@ -59,11 +58,6 @@ class ZhihuSpider(scrapy.Spider):
     def _sign_in(self, response):
         headers = self.headers.copy()
         headers.update({
-            'Origin': 'https://www.zhihu.com',
-            'Accept': 'application/json, text/plain, */*',
-            'Accept-Encoding': 'br, gzip, deflate',
-            'Accept-Language': 'en-us',
-            'DNT': '1',
             'authorization': 'oauth c3cef7c66a1843f8b3a9e6a1e3160e20',
             'X-Xsrftoken': re.match(
                 r'_xsrf=([\w|-]+)',
