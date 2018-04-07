@@ -44,8 +44,6 @@ class LagouUser:
         timestamp = int(time() * 1000)
         headers = self.__session.headers.copy()
         headers.update({
-            'Origin': 'https://passport.lagou.com',
-            'Host': 'passport.lagou.com',
             'Referer': self.__referer.format(timestamp),
             'X-Anit-Forge-Token': next(tokens).group(1),
             'X-Anit-Forge-Code': next(tokens).group(1),
@@ -63,7 +61,7 @@ class LagouUser:
                 'request_form_verifyCode': captcha
             })
 
-        self.__session.post(
+        debug_online_status = self.__session.post(
             self.__sign_in_api,
             headers=headers,
             data=self.__request_data
