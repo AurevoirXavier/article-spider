@@ -8,7 +8,7 @@ from parsel import Selector
 from StupidSpider.util.secret.secret import LAGOU_USERNAME, LAGOU_PASSWORD
 
 SIGN_IN_PAGE = 'https://passport.lagou.com/login/login.html'
-SIGN_IN_API = ' https://passport.lagou.com/login/login.json'
+SIGN_IN_API = 'https://passport.lagou.com/login/login.json'
 AUTH_API = 'https://passport.lagou.com/vcode/create?from=login&refresh={}'
 REFERER = 'https://passport.lagou.com/login/login.html?ts={}&serviceId=lagou&service=https%253A%252F%252Fwww.lagou.com%252F&action=login&signature=3DD28DEA42F297A5EDFCFDF1A962AE87C1'
 HEADERS = {

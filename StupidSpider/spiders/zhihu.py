@@ -154,7 +154,7 @@ class ZhihuSpider(scrapy.Spider):
     def _online_status(self, response):
         if response.status == 201:
             for url in self.start_urls:
-                yield Request(url, dont_filter=True, headers=self.headers)
+                yield Request(url, headers=self.headers, dont_filter=True)
 
     def parse(self, response):
         all_urls = [
