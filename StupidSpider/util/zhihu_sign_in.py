@@ -9,8 +9,8 @@ from PIL import Image
 from StupidSpider.util.secret import secret
 from StupidSpider.util.common import hmac_encode
 
-SIGN_UP_ADDRESS = 'https://www.zhihu.com/signup'
-SIGN_IN_ADDRESS = 'https://www.zhihu.com/api/v3/oauth/sign_in'
+SIGN_UP_PAGE = 'https://www.zhihu.com/signup'
+SIGN_IN_API = 'https://www.zhihu.com/api/v3/oauth/sign_in'
 MULTIPART_FORM = {
     'client_id': 'c3cef7c66a1843f8b3a9e6a1e3160e20',
     'grant_type': 'password',
@@ -30,8 +30,8 @@ HEADERS = {
 
 class ZhihuUser:
     def __init__(self):
-        self.__sign_up_address = SIGN_UP_ADDRESS
-        self.__sign_in_address = SIGN_IN_ADDRESS
+        self.__sign_up_page = SIGN_UP_PAGE
+        self.__sign_in_api = SIGN_IN_API
         self.__multipart_form = MULTIPART_FORM.copy()
         self.__session = requests.session()
         self.__session.headers = HEADERS.copy()
@@ -51,7 +51,7 @@ class ZhihuUser:
             'Accept-Language': 'en-us',
             'DNT': '1',
             'authorization': 'oauth c3cef7c66a1843f8b3a9e6a1e3160e20',
-            'X-Xsrftoken': self.__session.get(self.__sign_up_address).cookies.get('_xsrf')
+            'X-Xsrftoken': self.__session.get(self.__sign_up_page).cookies.get('_xsrf')
         })
 
         self.__multipart_form.update({
@@ -67,7 +67,7 @@ class ZhihuUser:
             'captcha': self._get_captcha(headers)
         })
         self.__session.post(
-            self.__sign_in_address,
+            self.__sign_in_api,
             data=self.__multipart_form,
             headers=headers
         )
@@ -120,7 +120,7 @@ class ZhihuUser:
 
     def online_status(self):
         if self.__session.get(
-                self.__sign_up_address,
+                self.__sign_up_page,
                 allow_redirects=False
         ).status_code == 302:
             self.__session.cookies.save()

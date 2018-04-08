@@ -8,7 +8,7 @@ from StupidSpider.util.secret.secret import LAGOU_USERNAME, LAGOU_PASSWORD
 
 SIGN_IN_PAGE = 'https://passport.lagou.com/login/login.html'
 SIGN_IN_API = ' https://passport.lagou.com/login/login.json'
-CAPTCHA = 'https://passport.lagou.com/vcode/create?from=login&refresh={}'
+AUTH_API = 'https://passport.lagou.com/vcode/create?from=login&refresh={}'
 REFERER = 'https://passport.lagou.com/login/login.html?ts={}&serviceId=lagou&service=https%253A%252F%252Fwww.lagou.com%252F&action=login&signature=3DD28DEA42F297A5EDFCFDF1A962AE87C1'
 HEADERS = {
     'Connection': 'keep-alive',
@@ -26,7 +26,7 @@ class LagouUser:
         self.__sign_in_page = SIGN_IN_PAGE
         self.__sign_in_api = SIGN_IN_API
         self.__referer = REFERER
-        self.__captcha = CAPTCHA
+        self.__auth_api = AUTH_API
         self.__request_data = REQUEST_DATA.copy()
         self.__session = requests.session()
         self.__session.headers = HEADERS.copy()
@@ -51,7 +51,7 @@ class LagouUser:
 
         if captcha:
             with open('captcha', 'wb') as f:
-                f.write(self.__session.get(self.__captcha.format(timestamp), headers=self.__session.headers).content)
+                f.write(self.__session.get(self.__auth_api.format(timestamp), headers=self.__session.headers).content)
 
             Image.open('captcha').show()
 

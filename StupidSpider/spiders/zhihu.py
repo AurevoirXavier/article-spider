@@ -12,9 +12,9 @@ from StupidSpider.util.secret.secret import ZHIHU_USERNAME, ZHIHU_PASSWORD
 from StupidSpider.items import ZhihuAnswerItem, ZhihuQuestionItem, ZhihuQuestionItemLoader
 from StupidSpider.util.common import hmac_encode, now, format_timestamp, take_first, symbol_eliminator
 
-SIGN_UP_ADDRESS = 'https://www.zhihu.com/signup'
-SIGN_IN_ADDRESS = 'https://www.zhihu.com/api/v3/oauth/sign_in'
-AUTH_ADDRESS = 'https://www.zhihu.com/api/v3/oauth/captcha?lang=en'
+SIGN_UP_PAGE = 'https://www.zhihu.com/signup'
+SIGN_IN_API = 'https://www.zhihu.com/api/v3/oauth/sign_in'
+AUTH_API = 'https://www.zhihu.com/api/v3/oauth/captcha?lang=en'
 ANSWER_API = 'https://www.zhihu.com/api/v4/questions/{0}/answers?sort_by=default&include=data%5B%2A%5D' \
              '.is_normal%2Cadmin_closed_comment%2Creward_info%2Cis_collapsed%2Cannotation_action' \
              '%2Cannotation_detail%2Ccollapse_reason%2Cis_sticky%2Ccollapsed_by%2Csuggest_edit%2Ccomment_count' \
@@ -33,10 +33,11 @@ FORM_DATA = {
     'client_id': 'c3cef7c66a1843f8b3a9e6a1e3160e20',
     'grant_type': 'password',
     'source': 'com.zhihu.web',
-    'username': '',
-    'password': '',
+    'username': ZHIHU_USERNAME,
+    'password': ZHIHU_PASSWORD,
     'lang': 'en',
-    'ref_source': 'homepage'
+    'ref_source': 'homepage',
+    'captcha': ''
 }
 
 
@@ -45,15 +46,15 @@ class ZhihuSpider(scrapy.Spider):
     allowed_domains = ['www.zhihu.com']
     start_urls = ['http://www.zhihu.com/']
 
-    sign_up_address = SIGN_UP_ADDRESS
-    sign_in_address = SIGN_IN_ADDRESS
+    sign_up_page = SIGN_UP_PAGE
+    sign_in_api = SIGN_IN_API
     answer_api = ANSWER_API
-    auth_address = AUTH_ADDRESS
+    auth_api = AUTH_API
     headers = HEADERS.copy()
     form_data = FORM_DATA.copy()
 
     def start_requests(self):
-        return [Request(self.sign_up_address, headers=self.headers, callback=self._sign_in)]
+        return [Request(self.sign_up_page, headers=self.headers, callback=self._sign_in)]
 
     def _sign_in(self, response):
         headers = self.headers.copy()
@@ -67,20 +68,17 @@ class ZhihuSpider(scrapy.Spider):
 
         timestamp = str(int(time() * 1000))
         self.form_data.update({
-            'username': ZHIHU_USERNAME,
-            'password': ZHIHU_PASSWORD,
             'timestamp': timestamp,
             'signature': hmac_encode(
                 self.form_data['grant_type'],
                 self.form_data['client_id'],
                 self.form_data['source'],
                 timestamp
-            ),
-            'captcha': ''
+            )
         })
 
         yield Request(
-            self.auth_address,
+            self.auth_api,
             headers=headers,
             meta={
                 'headers': headers,
@@ -94,7 +92,7 @@ class ZhihuSpider(scrapy.Spider):
 
         if re.search(r'true', response.text):
             yield Request(
-                self.auth_address,
+                self.auth_api,
                 method='PUT',
                 headers=headers,
                 meta={
@@ -105,7 +103,7 @@ class ZhihuSpider(scrapy.Spider):
             )
         else:
             yield FormRequest(
-                url=self.sign_in_address,
+                url=self.sign_in_api,
                 headers=headers,
                 formdata=response.meta.get('form_data'),
                 callback=self._online_status
@@ -132,7 +130,7 @@ class ZhihuSpider(scrapy.Spider):
         })
 
         yield FormRequest(
-            url=self.auth_address,
+            url=self.auth_api,
             headers=headers,
             formdata={
                 'input_text': input_text
@@ -146,7 +144,7 @@ class ZhihuSpider(scrapy.Spider):
 
     def _auth_with_captcha(self, response):
         yield FormRequest(
-            url=self.sign_in_address,
+            url=self.sign_in_api,
             headers=response.meta.get('headers'),
             formdata=response.meta.get('form_data'),
             callback=self._online_status
