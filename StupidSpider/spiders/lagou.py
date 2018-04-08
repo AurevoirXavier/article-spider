@@ -37,8 +37,8 @@ class LagouSpider(CrawlSpider):
     start_urls = ['https://www.lagou.com/']
 
     rules = (
-        Rule(LinkExtractor(allow=r'zhaopin/.*'), follow=True),
-        Rule(LinkExtractor(allow=r'gongsi/\d+.html'), follow=True),
+        Rule(LinkExtractor(allow=('zhaopin/.*', )), follow=True),
+        Rule(LinkExtractor(allow=('gongsi/\d+.html', )), follow=True),
         Rule(LinkExtractor(allow=r'jobs/\d+.html'), callback='parse_item', follow=True)
     )
 
@@ -83,13 +83,13 @@ class LagouSpider(CrawlSpider):
                 'request_form_verifyCode': captcha
             })
 
-        yield FormRequest(
+        return [FormRequest(
             url=self.sign_in_api,
             headers=headers,
             formdata=self.request_data,
             callback=self._online_status,
             dont_filter=True
-        )
+        )]
 
     def _online_status(self, response):
         if json.loads(response.text)['message'] == '操作成功':

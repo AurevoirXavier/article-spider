@@ -29,21 +29,21 @@ class LagouUser:
         self.__referer = REFERER
         self.__auth_api = AUTH_API
         self.__request_data = REQUEST_DATA.copy()
-        self.__session = requests.session()
-        self.__session.headers = HEADERS.copy()
+        self.session = requests.session()
+        self.session.headers = HEADERS.copy()
 
     def sign_in(self, captcha=False):
         tokens = re.finditer(
             r"'([\w|-]+)'",
             Selector(
-                self.__session.get(
+                self.session.get(
                     self.__sign_in_page
                 ).text
             ).css('head script:nth-last-child(2)::text').extract_first()
         )
 
         timestamp = int(time() * 1000)
-        headers = self.__session.headers.copy()
+        headers = self.session.headers.copy()
         headers.update({
             'Referer': self.__referer.format(timestamp),
             'X-Anit-Forge-Token': next(tokens).group(1),
@@ -52,7 +52,7 @@ class LagouUser:
 
         if captcha:
             with open('captcha', 'wb') as f:
-                f.write(self.__session.get(self.__auth_api.format(timestamp), headers=self.__session.headers).content)
+                f.write(self.session.get(self.__auth_api.format(timestamp), headers=self.session.headers).content)
 
             Image.open('captcha').show()
 
@@ -62,7 +62,7 @@ class LagouUser:
                 'request_form_verifyCode': captcha
             })
 
-        debug_online_status = self.__session.post(
+        debug_online_status = self.session.post(
             self.__sign_in_api,
             headers=headers,
             data=self.__request_data
@@ -74,7 +74,7 @@ class LagouUser:
             self.sign_in(captcha=True)
 
     def online_status(self):
-        return self.__session.get(
+        return self.session.get(
             self.__sign_in_page,
             allow_redirects=False
         ).status_code == 302
@@ -82,3 +82,5 @@ class LagouUser:
 
 user = LagouUser()
 user.sign_in()
+
+debug_online_status = user.session.get('https://www.lagou.com/jobs/4385349.html')
