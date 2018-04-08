@@ -15,6 +15,14 @@ from StupidSpider.util.common import hmac_encode, now, format_timestamp, take_fi
 SIGN_UP_ADDRESS = 'https://www.zhihu.com/signup'
 SIGN_IN_ADDRESS = 'https://www.zhihu.com/api/v3/oauth/sign_in'
 AUTH_ADDRESS = 'https://www.zhihu.com/api/v3/oauth/captcha?lang=en'
+ANSWER_API = 'https://www.zhihu.com/api/v4/questions/{0}/answers?sort_by=default&include=data%5B%2A%5D' \
+             '.is_normal%2Cadmin_closed_comment%2Creward_info%2Cis_collapsed%2Cannotation_action' \
+             '%2Cannotation_detail%2Ccollapse_reason%2Cis_sticky%2Ccollapsed_by%2Csuggest_edit%2Ccomment_count' \
+             '%2Ccan_comment%2Ccontent%2Ceditable_content%2Cvoteup_count%2Creshipment_settings' \
+             '%2Ccomment_permission%2Ccreated_time%2Cupdated_time%2Creview_info%2Crelevant_info%2Cquestion' \
+             '%2Cexcerpt%2Crelationship.is_authorized%2Cis_author%2Cvoting%2Cis_thanked%2Cis_nothelp' \
+             '%2Cupvoted_followees%3Bdata%5B%2A%5D.mark_infos%5B%2A%5D.url%3Bdata%5B%2A%5D.author.follower_count' \
+             '%2Cbadge%5B%3F%28type%3Dbest_answerer%29%5D.topics&limit={1}&offset={2}'
 HEADERS = {
     'Host': 'www.zhihu.com',
     'Connection': 'keep-alive',
@@ -43,14 +51,7 @@ class ZhihuSpider(scrapy.Spider):
     headers = HEADERS.copy()
     form_data = FORM_DATA.copy()
 
-    answer_api = 'https://www.zhihu.com/api/v4/questions/{0}/answers?sort_by=default&include=data%5B%2A%5D' \
-                 '.is_normal%2Cadmin_closed_comment%2Creward_info%2Cis_collapsed%2Cannotation_action' \
-                 '%2Cannotation_detail%2Ccollapse_reason%2Cis_sticky%2Ccollapsed_by%2Csuggest_edit%2Ccomment_count' \
-                 '%2Ccan_comment%2Ccontent%2Ceditable_content%2Cvoteup_count%2Creshipment_settings' \
-                 '%2Ccomment_permission%2Ccreated_time%2Cupdated_time%2Creview_info%2Crelevant_info%2Cquestion' \
-                 '%2Cexcerpt%2Crelationship.is_authorized%2Cis_author%2Cvoting%2Cis_thanked%2Cis_nothelp' \
-                 '%2Cupvoted_followees%3Bdata%5B%2A%5D.mark_infos%5B%2A%5D.url%3Bdata%5B%2A%5D.author.follower_count' \
-                 '%2Cbadge%5B%3F%28type%3Dbest_answerer%29%5D.topics&limit={1}&offset={2}'
+    answer_api = ANSWER_API
 
     def start_requests(self):
         return [Request(self.sign_up_address, headers=self.headers, callback=self._sign_in)]
