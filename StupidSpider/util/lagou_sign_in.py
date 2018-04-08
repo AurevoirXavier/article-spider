@@ -84,3 +84,6 @@ user = LagouUser()
 user.sign_in()
 
 debug_online_status = user.session.get('https://www.lagou.com/jobs/4385349.html')
+# test = requests.get('https://www.lagou.com/jobs/4385349.html', headers=HEADERS)
+
+pass
