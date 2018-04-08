@@ -46,7 +46,7 @@ class LagouUser:
         headers.update({
             'Referer': self.__referer.format(timestamp),
             'X-Anit-Forge-Token': next(tokens).group(1),
-            'X-Anit-Forge-Code': next(tokens).group(1),
+            'X-Anit-Forge-Code': next(tokens).group(1)
         })
 
         if captcha:
