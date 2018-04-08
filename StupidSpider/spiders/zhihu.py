@@ -47,11 +47,10 @@ class ZhihuSpider(scrapy.Spider):
 
     sign_up_address = SIGN_UP_ADDRESS
     sign_in_address = SIGN_IN_ADDRESS
+    answer_api = ANSWER_API
     auth_address = AUTH_ADDRESS
     headers = HEADERS.copy()
     form_data = FORM_DATA.copy()
-
-    answer_api = ANSWER_API
 
     def start_requests(self):
         return [Request(self.sign_up_address, headers=self.headers, callback=self._sign_in)]

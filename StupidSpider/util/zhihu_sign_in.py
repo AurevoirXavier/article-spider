@@ -30,18 +30,18 @@ HEADERS = {
 
 class ZhihuUser:
     def __init__(self):
-        self.sign_up_address = SIGN_UP_ADDRESS
-        self.sign_in_address = SIGN_IN_ADDRESS
-        self.multipart_form = MULTIPART_FORM.copy()
-        self.session = requests.session()
-        self.session.headers = HEADERS.copy()
-        self.session.cookies = LWPCookieJar(filename='./cookie')
+        self.__sign_up_address = SIGN_UP_ADDRESS
+        self.__sign_in_address = SIGN_IN_ADDRESS
+        self.__multipart_form = MULTIPART_FORM.copy()
+        self.__session = requests.session()
+        self.__session.headers = HEADERS.copy()
+        self.__session.cookies = LWPCookieJar(filename='./cookie')
 
     def sign_in(self, username, password, load_cookie=True):
         if load_cookie and self._load_cookie():
             return self.online_status()
 
-        headers = self.session.headers.copy()
+        headers = self.__session.headers.copy()
         timestamp = str(int(time() * 1000))
 
         headers.update({
@@ -51,24 +51,24 @@ class ZhihuUser:
             'Accept-Language': 'en-us',
             'DNT': '1',
             'authorization': 'oauth c3cef7c66a1843f8b3a9e6a1e3160e20',
-            'X-Xsrftoken': self.session.get(self.sign_up_address).cookies.get('_xsrf')
+            'X-Xsrftoken': self.__session.get(self.__sign_up_address).cookies.get('_xsrf')
         })
 
-        self.multipart_form.update({
+        self.__multipart_form.update({
             'username': username,
             'password': password,
             'timestamp': timestamp,
             'signature': hmac_encode(
-                self.multipart_form['grant_type'],
-                self.multipart_form['client_id'],
-                self.multipart_form['source'],
+                self.__multipart_form['grant_type'],
+                self.__multipart_form['client_id'],
+                self.__multipart_form['source'],
                 timestamp
             ),
             'captcha': self._get_captcha(headers)
         })
-        self.session.post(
-            self.sign_in_address,
-            data=self.multipart_form,
+        self.__session.post(
+            self.__sign_in_address,
+            data=self.__multipart_form,
             headers=headers
         )
 
@@ -76,7 +76,7 @@ class ZhihuUser:
 
     def _load_cookie(self):
         try:
-            self.session.cookies.load(ignore_discard=True)
+            self.__session.cookies.load(ignore_discard=True)
 
             return True
         except FileNotFoundError:
@@ -86,14 +86,14 @@ class ZhihuUser:
         auth_address = 'https://www.zhihu.com/api/v3/oauth/captcha?lang=en'
         captcha = re.search(
             r'true',
-            self.session.get(
+            self.__session.get(
                 auth_address,
                 headers=headers
             ).text
         )
 
         if captcha:
-            auth = self.session.put(auth_address, headers=headers)
+            auth = self.__session.put(auth_address, headers=headers)
             base64_img = re.findall(
                 r'"img_base64":"(.+)"',
                 auth.text,
@@ -107,7 +107,7 @@ class ZhihuUser:
 
             input_text = input('Captcha: ')
 
-            self.session.post(
+            self.__session.post(
                 auth_address,
                 data={
                     'input_text': input_text
@@ -119,11 +119,11 @@ class ZhihuUser:
         return ''
 
     def online_status(self):
-        if self.session.get(
-                self.sign_up_address,
+        if self.__session.get(
+                self.__sign_up_address,
                 allow_redirects=False
         ).status_code == 302:
-            self.session.cookies.save()
+            self.__session.cookies.save()
 
             return True
         return False

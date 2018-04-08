@@ -27,7 +27,6 @@ class LagouSpider(CrawlSpider):
     def start_requests(self):
         return [Request(self.sign_up_address, headers=self.headers, callback=self._sign_in)]
 
-
     def parse_item(self, response):
         i = {}
         # i['domain_id'] = response.xpath('//input[@id="sid"]/@value').extract()
