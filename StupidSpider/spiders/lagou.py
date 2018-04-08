@@ -25,8 +25,8 @@ class LagouSpider(CrawlSpider):
     )
 
     def start_requests(self):
-        for url in self.start_urls:
-            yield Request(url, headers=HEADERS, dont_filter=True)
+        return [Request(self.sign_up_address, headers=self.headers, callback=self._sign_in)]
+
 
     def parse_item(self, response):
         i = {}

@@ -4,21 +4,21 @@ import requests
 from PIL import Image
 from time import time
 from parsel import Selector
-from StupidSpider.util.secret.secret import ZHIHU_USERNAME, LAGOU_PASSWORD
+from StupidSpider.util.secret.secret import LAGOU_USERNAME, LAGOU_PASSWORD
 
-HEADERS = {
-    'Connection': 'keep-alive',
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1 Safari/605.1.15',
-}
 SIGN_IN_PAGE = 'https://passport.lagou.com/login/login.html'
 SIGN_IN_API = ' https://passport.lagou.com/login/login.json'
-REQUEST_DATA = {
-    'username': ZHIHU_USERNAME,
-    'password': LAGOU_PASSWORD,
-    'request_form_verifyCode': '',
-}
-REFERER = 'https://passport.lagou.com/login/login.html?ts={}&serviceId=lagou&service=https%253A%252F%252Fwww.lagou.com%252F&action=login&signature=3DD28DEA42F297A5EDFCFDF1A962AE87C1'
 CAPTCHA = 'https://passport.lagou.com/vcode/create?from=login&refresh={}'
+REFERER = 'https://passport.lagou.com/login/login.html?ts={}&serviceId=lagou&service=https%253A%252F%252Fwww.lagou.com%252F&action=login&signature=3DD28DEA42F297A5EDFCFDF1A962AE87C1'
+HEADERS = {
+    'Connection': 'keep-alive',
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1 Safari/605.1.15'
+}
+REQUEST_DATA = {
+    'username': LAGOU_USERNAME,
+    'password': LAGOU_PASSWORD,
+    'request_form_verifyCode': ''
+}
 
 
 class LagouUser:
