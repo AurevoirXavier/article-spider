@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
+import re
 import scrapy
 
-from scrapy import Request
+from PIL import Image
+from time import time
+from scrapy import Request, FormRequest
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
+
+from StupidSpider.util.secret.secret import LAGOU_USERNAME, LAGOU_PASSWORD
+
 
 HEADERS = {
     'Host': 'www.lagou.com',

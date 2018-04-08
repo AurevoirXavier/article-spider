@@ -4,6 +4,7 @@ import requests
 from PIL import Image
 from time import time
 from parsel import Selector
+
 from StupidSpider.util.secret.secret import LAGOU_USERNAME, LAGOU_PASSWORD
 
 SIGN_IN_PAGE = 'https://passport.lagou.com/login/login.html'
