@@ -90,7 +90,7 @@ class ZhihuQuestionItem(scrapy.Item):
     url = scrapy.Field()
     title = scrapy.Field()
     content = scrapy.Field()
-    answers = scrapy.Field()
+    answers = scrapy.Field(input_processor=MapCompose(lambda text: re.sub(r',', '', text), int))
     comments = scrapy.Field(input_processor=MapCompose(digit_at_head))
     follower_and_views = scrapy.Field(output_processor=MapCompose(int))
     created_time = scrapy.Field()

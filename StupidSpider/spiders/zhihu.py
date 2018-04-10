@@ -37,7 +37,7 @@ FORM_DATA = {
 class ZhihuSpider(scrapy.Spider):
     name = 'zhihu'
     allowed_domains = ['www.zhihu.com']
-    start_urls = ['https://www.zhihu.com/']
+    start_urls = ['https://www.zhihu.com/question/271706997']
 
     sign_up_page = SIGN_UP_PAGE
     sign_in_api = SIGN_IN_API
@@ -170,7 +170,6 @@ class ZhihuSpider(scrapy.Spider):
                     headers=self.headers,
                     callback=self.parse_question
                 )
-                break
             else:
                 yield Request(url, headers=self.headers, callback=self.parse)
 
@@ -186,7 +185,7 @@ class ZhihuSpider(scrapy.Spider):
         zhihu_question_item_loader.add_value('url', response.url)
         zhihu_question_item_loader.add_css('title', 'h1.QuestionHeader-title::text')
         zhihu_question_item_loader.add_css('content', '.QuestionHeader-detail')
-        zhihu_question_item_loader.add_value('answers', '.List-headerText span::text')
+        zhihu_question_item_loader.add_value('answers', response.css('.List-headerText span::text').extract_first('0'))
         zhihu_question_item_loader.add_css('comments', '.QuestionHeader-Comment button::text')
         zhihu_question_item_loader.add_css('follower_and_views', '.NumberBoard-itemValue::attr(title)')
         zhihu_question_item_loader.add_value('crawl_time', now())
