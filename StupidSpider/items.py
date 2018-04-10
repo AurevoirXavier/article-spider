@@ -202,7 +202,7 @@ class LagouJobItem(scrapy.Item):
     degree_require = scrapy.Field(input_processor=MapCompose(slash_eliminator))
     type = scrapy.Field()
     publish_time = scrapy.Field(input_processor=MapCompose(lagou_format_time))
-    label = scrapy.Field()
+    label = scrapy.Field(output_processor=Join(','))
     advantage = scrapy.Field()
     description = scrapy.Field()
     address = scrapy.Field()

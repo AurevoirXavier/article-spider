@@ -68,12 +68,12 @@ def lagou_format_time(text):
                 datetime.now() - timedelta(days=int(re.match(r'(\d+).*', text).group(1)))
         ).strftime(SQL_DATE_FORMAT)
 
-    return re.match(r'(.+)  ', text).group(1)
+    return re.match(r'(\d{4}-\d{2}-\d{2}).+', text).group(1)
 
 
 def lagou_format_salary(text):
     if '-' in text:
-        return re.match(r'(\d+)k-(\d+)k', text).groups()
+        return re.match(r'(\d+).-(\d+).*', text).groups()
 
     return [re.match('(\d+).+', text).group(1), 0]
 

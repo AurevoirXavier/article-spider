@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 import re
-import scrapy
 
-from datetime import datetime
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 
-from StupidSpider.items import LagouJobItem, LagouJobItemLoader
+from StupidSpider.util.common import now
 from StupidSpider.util.secret.secret import LAGOU_COOKIES
+from StupidSpider.items import LagouJobItem, LagouJobItemLoader
 
 
 class LagouSpider(CrawlSpider):
@@ -42,7 +41,10 @@ class LagouSpider(CrawlSpider):
         item_loader.add_css('experience', '.job_request p>:nth-child(3)::text')
         item_loader.add_css('degree_require', '.job_request p>:nth-child(4)::text')
         item_loader.add_css('type', '.job_request p>:nth-child(5)::text')
-        item_loader.add_css('label', '.position-label li::text')
+        item_loader.add_value(
+            'label',
+            response.css('.position-label li::text').extract()
+        )
         item_loader.add_css('publish_time', '.publish_time::text')
         item_loader.add_css('advantage', '.job-advantage p::text')
         item_loader.add_css('description', '.job_bt div')
@@ -55,6 +57,6 @@ class LagouSpider(CrawlSpider):
         )
         item_loader.add_css('company_name', '#job_company dt a img::attr(alt)')
         item_loader.add_css('company_page', '#job_company dt a::attr(href)')
-        item_loader.add_value('crawl_time', datetime.now())
+        item_loader.add_value('crawl_time', now())
 
         return item_loader.load_item()
