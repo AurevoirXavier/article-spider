@@ -46,8 +46,13 @@ def jobbole_dot_eliminator(text):
         return 0
 
 
-def word_eliminator(text):
+def slash_eliminator(text):
+    return re.sub(r'/| ', '', text)
+
+
+def digit_at_head(text):
     re_match = re.match(r'(\d+).*', text)
+
     if re_match:
         return int(re_match.group(1))
     else:
