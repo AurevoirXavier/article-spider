@@ -48,12 +48,20 @@ class LagouSpider(CrawlSpider):
         item_loader.add_css('publish_time', '.publish_time::text')
         item_loader.add_css('advantage', '.job-advantage p::text')
         item_loader.add_css('description', '.job_bt div')
+
+        address = response.css('.work_addr::text').extract()
         item_loader.add_value(
             'address',
             '-'.join(
                 response.css('.work_addr a::text').extract()[:-1]
                 +
-                [re.sub(r'\n|-| ', '', response.css('.work_addr::text').extract()[-2])])
+                [re.sub(
+                    r'\n|-| ',
+                    '',
+                    address[-2]
+                )] if len(address) > 1
+                else address
+            )
         )
         item_loader.add_css('company_name', '#job_company dt a img::attr(alt)')
         item_loader.add_css('company_page', '#job_company dt a::attr(href)')
