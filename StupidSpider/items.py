@@ -91,7 +91,7 @@ class ZhihuQuestionItem(scrapy.Item):
     title = scrapy.Field()
     content = scrapy.Field()
     answers = scrapy.Field()
-    comments = scrapy.Field(input_processor=Compose(digit_at_head))
+    comments = scrapy.Field(input_processor=MapCompose(digit_at_head))
     follower_and_views = scrapy.Field(output_processor=MapCompose(int))
     created_time = scrapy.Field()
     updated_time = scrapy.Field()
@@ -197,13 +197,13 @@ class LagouJobItem(scrapy.Item):
     url = scrapy.Field()
     position = scrapy.Field()
     salary = scrapy.Field(
-        output_processor=Compose(
+        output_processor=MapCompose(
             lambda salary: re.match(r'(\d+)k-(\d+)k', salary)
         )
     )
-    city = scrapy.Field(output_processor=Compose())
-    experience = scrapy.Field()
-    degree_require = scrapy.Field(output_processor=Compose())
+    city = scrapy.Field(input_processor=MapCompose(slash_eliminator))
+    experience = scrapy.Field(input_processor=MapCompose(slash_eliminator))
+    degree_require = scrapy.Field(input_processor=MapCompose(slash_eliminator))
     type = scrapy.Field()
     publish_time = scrapy.Field()
     label = scrapy.Field()

@@ -37,7 +37,7 @@ FORM_DATA = {
 class ZhihuSpider(scrapy.Spider):
     name = 'zhihu'
     allowed_domains = ['www.zhihu.com']
-    start_urls = ['http://www.zhihu.com/']
+    start_urls = ['https://www.zhihu.com/']
 
     sign_up_page = SIGN_UP_PAGE
     sign_in_api = SIGN_IN_API
