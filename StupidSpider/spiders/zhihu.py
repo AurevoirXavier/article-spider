@@ -10,8 +10,8 @@ from urllib.parse import urljoin
 from scrapy import Request, FormRequest
 
 from StupidSpider.util.secret.secret import ZHIHU_USERNAME, ZHIHU_PASSWORD
+from StupidSpider.util.common import hmac_encode, now, format_timestamp, take_first
 from StupidSpider.items import ZhihuAnswerItem, ZhihuQuestionItem, ZhihuQuestionItemLoader
-from StupidSpider.util.common import hmac_encode, now, format_timestamp, take_first, symbol_eliminator
 
 SIGN_UP_PAGE = 'https://www.zhihu.com/signup'
 SIGN_IN_API = 'https://www.zhihu.com/api/v3/oauth/sign_in'
@@ -189,11 +189,12 @@ class ZhihuSpider(scrapy.Spider):
         zhihu_question_item_loader.add_value(
             'answers',
             int(
-                symbol_eliminator(
+                re.sub(
+                    r',',
+                    '',
                     response.css(
                         '.List-headerText span::text'
-                    ).extract_first('0')
-                )
+                    ).extract_first('0'))
             )
         )
         zhihu_question_item_loader.add_css('comments', '.QuestionHeader-Comment button::text')

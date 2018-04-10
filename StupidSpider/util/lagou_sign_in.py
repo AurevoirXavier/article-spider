@@ -3,9 +3,9 @@ import requests
 
 from PIL import Image
 from time import time
-from hashlib import md5
 from parsel import Selector
 
+from StupidSpider.util.common import md5_encode
 from StupidSpider.util.secret.secret import LAGOU_USERNAME, LAGOU_PASSWORD
 
 SIGN_IN_PAGE = 'https://passport.lagou.com/login/login.html'
@@ -61,11 +61,7 @@ class LagouUser:
             })
 
         self.__request_data.update({
-            'password': md5(
-                (
-                        'veenike' + md5(LAGOU_PASSWORD.encode('utf8')).hexdigest() + 'veenike'
-                ).encode('utf8')
-            ).hexdigest()
+            'password': md5_encode('veenike' + md5_encode(LAGOU_PASSWORD) + 'veenike')
         })
 
         debug_online_status = self.session.post(

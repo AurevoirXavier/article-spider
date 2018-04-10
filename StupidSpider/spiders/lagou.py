@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import scrapy
 
+from datetime import datetime
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 
+from StupidSpider.items import LagouJobItem, LagouJobItemLoader
 from StupidSpider.util.secret.secret import LAGOU_COOKIES
 
 
@@ -19,6 +21,7 @@ class LagouSpider(CrawlSpider):
     )
 
     custom_settings = {
+        "COOKIES_ENABLED": False,
         'DEFAULT_REQUEST_HEADERS': {
             'Host': 'www.lagou.com',
             'Origin': 'https://www.lagou.com',
@@ -30,8 +33,22 @@ class LagouSpider(CrawlSpider):
     }
 
     def parse_job(self, response):
-        i = {}
-        # i['domain_id'] = response.xpath('//input[@id="sid"]/@value').extract()
-        # i['name'] = response.xpath('//div[@id="name"]').extract()
-        # i['description'] = response.xpath('//div[@id="description"]').extract()
-        return i
+        item_loader = LagouJobItemLoader(item=LagouJobItem(), response=response)
+        item_loader.add_value('url', response.url)
+        item_loader.add_css('position', '.job-name::attr(title)')
+        item_loader.add_css('salary', '.salary::text')
+        item_loader.add_css('city', '.job_request p>:nth-child(2)::text')
+        item_loader.add_css('experience', '.job_request p>:nth-child(3)::text')
+        item_loader.add_css('degree_require', '.job_request p>:nth-child(4)::text')
+        item_loader.add_css('type', '.job_request p>:nth-child(5)::text')
+        item_loader.add_css('label', '.position-label li::text')
+        item_loader.add_css('publish_time', '.publish_time::text')
+        item_loader.add_css('advantage', '.job-advantage p::text')
+        item_loader.add_css('description', '.job_bt div')
+        item_loader.add_css('address', '.work_addr')
+        item_loader.add_css('company_name', '#job_company dt a img::attr(alt)')
+        item_loader.add_css('company_page', '#job_company dt a::attr(href)')
+        item_loader.add_value('crawl_time', datetime.now())
+
+        a = item_loader.load_item()
+        return item_loader.load_item()

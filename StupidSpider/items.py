@@ -10,7 +10,7 @@ import scrapy
 from scrapy.loader import ItemLoader
 from scrapy.loader.processors import Compose, MapCompose, TakeFirst, Join
 
-from StupidSpider.util import common
+from StupidSpider.util.common import *
 
 
 class StupidspiderItem(scrapy.Item):
@@ -28,7 +28,9 @@ class JobboleArticleItem(scrapy.Item):
     front_img_path = scrapy.Field()
     url = scrapy.Field()
     title = scrapy.Field()
-    post_date = scrapy.Field(output_processor=Compose(common.date_convert))
+    post_date = scrapy.Field(output_processor=Compose(
+        lambda text: datetime.strptime(re.sub(r'[ \r\n·]', '', text[0]), '%Y/%m/%d')
+    ))
     category = scrapy.Field()
     tag = scrapy.Field(
         input_processor=MapCompose(lambda tag: None if '评论' in tag else tag),
@@ -36,8 +38,8 @@ class JobboleArticleItem(scrapy.Item):
     )
     content = scrapy.Field()
     votes = scrapy.Field(input_processor=MapCompose(int))
-    bookmarks = scrapy.Field(input_processor=MapCompose(common.jobbole_dot_eliminator))
-    comments = scrapy.Field(input_processor=MapCompose(common.jobbole_dot_eliminator))
+    bookmarks = scrapy.Field(input_processor=MapCompose(jobbole_dot_eliminator))
+    comments = scrapy.Field(input_processor=MapCompose(jobbole_dot_eliminator))
 
     def insert_sql_with_params(self):
         insert_sql = '''
@@ -64,7 +66,7 @@ class JobboleArticleItem(scrapy.Item):
             self['front_img_url'][0],
             self.get('front_img_path'),
             self['url'],
-            common.md5_encode(self['url']),
+            md5_encode(self['url']),
             self['title'],
             self['post_date'],
             self['category'],
@@ -91,8 +93,7 @@ class ZhihuQuestionItem(scrapy.Item):
     answers = scrapy.Field()
     comments = scrapy.Field(
         input_processor=MapCompose(
-            lambda comments:
-            common.word_eliminator(comments) if comments else 0
+            lambda comments: word_eliminator(comments) if comments else 0
         )
     )
     follower_and_views = scrapy.Field(output_processor=MapCompose(int))
@@ -184,12 +185,35 @@ class ZhihuAnswerItem(scrapy.Item):
             self['content'],
             self['votes'],
             self['comments'],
-            common.format_timestamp(self['created_time']),
-            common.format_timestamp(self['updated_time']),
+            format_timestamp(self['created_time']),
+            format_timestamp(self['updated_time']),
             self['crawl_time']
         )
 
         return insert_sql, params
 
 
-class LagouJob(scrapy.Item):
+class LagouJobItemLoader(ItemLoader):
+    default_output_processor = TakeFirst()
+
+
+class LagouJobItem(scrapy.Item):
+    url = scrapy.Field()
+    position = scrapy.Field()
+    salary = scrapy.Field(
+        output_processor=Compose(
+            lambda salary: re.match(r'(\d+)k-(\d+)k', salary)
+        )
+    )
+    city = scrapy.Field(output_processor=Compose())
+    experience = scrapy.Field()
+    degree_require = scrapy.Field(output_processor=Compose())
+    type = scrapy.Field()
+    publish_time = scrapy.Field()
+    label = scrapy.Field()
+    advantage = scrapy.Field()
+    description = scrapy.Field()
+    address = scrapy.Field()
+    company_name = scrapy.Field()
+    company_page = scrapy.Field()
+    crawl_time = scrapy.Field()

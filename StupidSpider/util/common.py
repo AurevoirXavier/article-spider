@@ -1,26 +1,26 @@
 import re
 import hmac
 import hashlib
-import datetime
 
 from hashlib import sha1
+from datetime import datetime
 
 SQL_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 SQL_DATE_FORMAT = '%Y-%m-%d'
 
 
-def md5_encode(url):
-    if isinstance(url, str):
-        url = url.encode('utf8')
+def md5_encode(text):
+    if isinstance(text, str):
+        text = text.encode('utf8')
 
     m = hashlib.md5()
-    m.update(url)
+    m.update(text)
 
     return m.hexdigest()
 
 
-def take_first(l, default=None):
-    for first in l:
+def take_first(iterable, default=None):
+    for first in iterable:
         return first
 
     return default
@@ -38,24 +38,12 @@ def hmac_encode(grant_type, client_id, source, timestamp):
     return signature.hexdigest()
 
 
-def date_convert(text):
-    date = re.sub(r'[ \r\n·]', '', text[0])
-    if date:
-        return datetime.datetime.strptime(date, '%Y/%m/%d')
-    else:
-        return datetime.datetime.now()
-
-
 def jobbole_dot_eliminator(text):
     re_match = re.match(r'.*?(\d+).*', text)
     if re_match:
         return int(re_match.group(1))
     else:
         return 0
-
-
-def symbol_eliminator(text):
-    return re.sub(r',', '', text)
 
 
 def word_eliminator(text):
@@ -67,12 +55,12 @@ def word_eliminator(text):
 
 
 def format_timestamp(timestamp):
-    return datetime.datetime \
+    return datetime \
         .fromtimestamp(timestamp) \
         .strftime(SQL_DATETIME_FORMAT)
 
 
 def now():
-    return datetime.datetime \
+    return datetime \
         .now() \
         .strftime(SQL_DATETIME_FORMAT)
