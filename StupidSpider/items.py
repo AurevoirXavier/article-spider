@@ -190,3 +190,6 @@ class ZhihuAnswerItem(scrapy.Item):
         )
 
         return insert_sql, params
+
+
+class LagouJob(scrapy.Item):

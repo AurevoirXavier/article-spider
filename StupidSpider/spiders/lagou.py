@@ -15,7 +15,7 @@ class LagouSpider(CrawlSpider):
     rules = (
         Rule(LinkExtractor(allow=r'zhaopin/.*'), follow=True),
         Rule(LinkExtractor(allow=r'gongsi/\d+.html'), follow=True),
-        Rule(LinkExtractor(allow=r'jobs/\d+.html'), callback='parse_item', follow=True)
+        Rule(LinkExtractor(allow=r'jobs/\d+.html'), callback='parse_job', follow=True)
     )
 
     custom_settings = {
@@ -29,7 +29,7 @@ class LagouSpider(CrawlSpider):
         }
     }
 
-    def parse_item(self, response):
+    def parse_job(self, response):
         i = {}
         # i['domain_id'] = response.xpath('//input[@id="sid"]/@value').extract()
         # i['name'] = response.xpath('//div[@id="name"]').extract()
