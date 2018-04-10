@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 import scrapy
 
 from datetime import datetime
@@ -45,7 +46,13 @@ class LagouSpider(CrawlSpider):
         item_loader.add_css('publish_time', '.publish_time::text')
         item_loader.add_css('advantage', '.job-advantage p::text')
         item_loader.add_css('description', '.job_bt div')
-        item_loader.add_css('address', '.work_addr')
+        item_loader.add_value(
+            'address',
+            '-'.join(
+                response.css('.work_addr a::text').extract()[:-1]
+                +
+                [re.sub(r'\n|-| ', '', response.css('.work_addr::text').extract()[-2])])
+        )
         item_loader.add_css('company_name', '#job_company dt a img::attr(alt)')
         item_loader.add_css('company_page', '#job_company dt a::attr(href)')
         item_loader.add_value('crawl_time', datetime.now())

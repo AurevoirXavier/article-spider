@@ -3,7 +3,7 @@ import hmac
 import hashlib
 
 from hashlib import sha1
-from datetime import datetime
+from datetime import datetime, timedelta
 
 SQL_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 SQL_DATE_FORMAT = '%Y-%m-%d'
@@ -59,13 +59,25 @@ def digit_at_head(text):
         return 0
 
 
+def lagou_format_time(text):
+    if ':' in text:
+        return now(SQL_DATE_FORMAT)
+
+    if '天' in text:
+        return (
+                datetime.now() - timedelta(days=int(re.match(r'(\d+).*', text).group(1)))
+        ).strftime(SQL_DATE_FORMAT)
+
+    return re.match(r'(.+)  ', text).group(1)
+
+
 def format_timestamp(timestamp):
     return datetime \
         .fromtimestamp(timestamp) \
         .strftime(SQL_DATETIME_FORMAT)
 
 
-def now():
+def now(default_format=SQL_DATETIME_FORMAT):
     return datetime \
         .now() \
-        .strftime(SQL_DATETIME_FORMAT)
+        .strftime(default_format)

@@ -33,7 +33,7 @@ class JobboleArticleItem(scrapy.Item):
     ))
     category = scrapy.Field()
     tag = scrapy.Field(
-        input_processor=MapCompose(lambda tag: None if '评论' in tag else tag),
+        input_processor=MapCompose(lambda text: None if '评论' in text else text),
         output_processor=Join(',')
     )
     content = scrapy.Field()
@@ -198,14 +198,18 @@ class LagouJobItem(scrapy.Item):
     position = scrapy.Field()
     salary = scrapy.Field(
         output_processor=MapCompose(
-            lambda salary: re.match(r'(\d+)k-(\d+)k', salary)
+            lambda text: re.match(r'(\d+)k-(\d+)k', text).groups()
         )
     )
     city = scrapy.Field(input_processor=MapCompose(slash_eliminator))
-    experience = scrapy.Field(input_processor=MapCompose(slash_eliminator))
+    experience = scrapy.Field(
+        output_processor=MapCompose(
+            lambda text: re.match(r'.*(\d+)-(\d+).*', text).groups()
+        )
+    )
     degree_require = scrapy.Field(input_processor=MapCompose(slash_eliminator))
     type = scrapy.Field()
-    publish_time = scrapy.Field()
+    publish_time = scrapy.Field(input_processor=MapCompose(lagou_format_time))
     label = scrapy.Field()
     advantage = scrapy.Field()
     description = scrapy.Field()
