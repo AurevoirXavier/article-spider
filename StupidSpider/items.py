@@ -196,17 +196,9 @@ class LagouJobItemLoader(ItemLoader):
 class LagouJobItem(scrapy.Item):
     url = scrapy.Field()
     position = scrapy.Field()
-    salary = scrapy.Field(
-        output_processor=MapCompose(
-            lambda text: re.match(r'(\d+)k-(\d+)k', text).groups()
-        )
-    )
+    salary = scrapy.Field(output_processor=MapCompose(lagou_format_salary))
     city = scrapy.Field(input_processor=MapCompose(slash_eliminator))
-    experience = scrapy.Field(
-        output_processor=MapCompose(
-            lambda text: re.match(r'.*(\d+)-(\d+).*', text).groups()
-        )
-    )
+    experience = scrapy.Field(output_processor=MapCompose(lagou_format_experience))
     degree_require = scrapy.Field(input_processor=MapCompose(slash_eliminator))
     type = scrapy.Field()
     publish_time = scrapy.Field(input_processor=MapCompose(lagou_format_time))
@@ -217,3 +209,50 @@ class LagouJobItem(scrapy.Item):
     company_name = scrapy.Field()
     company_page = scrapy.Field()
     crawl_time = scrapy.Field()
+
+    def insert_sql_with_params(self):
+        insert_sql = '''
+            INSERT INTO lagou_spider.job (
+                url,
+                url_id,
+                position,
+                salary_min,
+                salary_max,
+                city,
+                experience_min,
+                experience_max,
+                degree_require,
+                type,
+                publish_time,
+                label,
+                advantage,
+                description,
+                address,
+                company_name,
+                company_page,
+                crawl_time
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (url_id) DO NOTHING
+            '''
+        params = (
+            self['url'],
+            md5_encode(self['url']),
+            self['position'],
+            self['salary'][0],
+            self['salary'][1],
+            self['city'],
+            self['experience'][0],
+            self['experience'][1],
+            self['degree_require'],
+            self['type'],
+            self['publish_time'],
+            self['label'],
+            self['advantage'],
+            self['description'],
+            self['address'],
+            self['company_name'],
+            self['company_page'],
+            self['crawl_time']
+        )
+
+        return insert_sql, params

@@ -57,5 +57,4 @@ class LagouSpider(CrawlSpider):
         item_loader.add_css('company_page', '#job_company dt a::attr(href)')
         item_loader.add_value('crawl_time', datetime.now())
 
-        a = item_loader.load_item()
         return item_loader.load_item()

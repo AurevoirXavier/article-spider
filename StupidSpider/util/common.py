@@ -71,6 +71,26 @@ def lagou_format_time(text):
     return re.match(r'(.+)  ', text).group(1)
 
 
+def lagou_format_salary(text):
+    if '-' in text:
+        return re.match(r'(\d+)k-(\d+)k', text).groups()
+
+    return [re.match('(\d+).+', text).group(1), 0]
+
+
+def lagou_format_experience(text):
+    if '-' in text:
+        return re.match(r'.*?(\d+)-(\d+).*', text).groups()
+
+    if '应' in text:
+        return [1, 0]
+
+    if '以' in text:
+        return [0, re.match(r'.+?(\d+).+', text).group(1)]
+
+    return [0, 0]
+
+
 def format_timestamp(timestamp):
     return datetime \
         .fromtimestamp(timestamp) \
