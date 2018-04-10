@@ -41,10 +41,7 @@ class LagouSpider(CrawlSpider):
         item_loader.add_css('experience', '.job_request p>:nth-child(3)::text')
         item_loader.add_css('degree_require', '.job_request p>:nth-child(4)::text')
         item_loader.add_css('type', '.job_request p>:nth-child(5)::text')
-        item_loader.add_value(
-            'label',
-            response.css('.position-label li::text').extract()
-        )
+        item_loader.add_css('label','.position-label li::text')
         item_loader.add_css('publish_time', '.publish_time::text')
         item_loader.add_css('advantage', '.job-advantage p::text')
         item_loader.add_css('description', '.job_bt div')

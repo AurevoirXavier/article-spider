@@ -246,7 +246,7 @@ class LagouJobItem(scrapy.Item):
             self['degree_require'],
             self['type'],
             self['publish_time'],
-            self['label'],
+            self.get('label', default=''),
             self['advantage'],
             self['description'],
             self['address'],
