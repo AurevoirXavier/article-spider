@@ -3,8 +3,9 @@ import base64
 import requests
 
 from time import time
-from http.cookiejar import LWPCookieJar
 from PIL import Image
+from tempfile import TemporaryFile
+from http.cookiejar import LWPCookieJar
 
 from StupidSpider.util.secret import secret
 from StupidSpider.util.common import hmac_encode
@@ -100,10 +101,10 @@ class ZhihuUser:
                 re.S
             )[0].replace(r'\n', '')
 
-            with open('captcha.jpg', 'wb') as f:
+            with TemporaryFile() as f:
                 f.write(base64.b64decode(base64_img))
-
-            Image.open('captcha').show()
+                Image.open(f).show()
+                f.close()
 
             input_text = input('Captcha: ')
 

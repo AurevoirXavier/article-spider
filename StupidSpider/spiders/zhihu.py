@@ -7,6 +7,7 @@ import base64
 from time import time
 from PIL import Image
 from urllib.parse import urljoin
+from tempfile import TemporaryFile
 from scrapy import Request, FormRequest
 
 from StupidSpider.util.secret.secret import ZHIHU_USERNAME, ZHIHU_PASSWORD
@@ -119,10 +120,10 @@ class ZhihuSpider(scrapy.Spider):
             re.S
         )[0].replace(r'\n', '')
 
-        with open('./util/captcha', 'wb') as f:
+        with TemporaryFile() as f:
             f.write(base64.b64decode(base64_img))
-
-        Image.open('./util/captcha').show()
+            Image.open(f).show()
+            f.close()
 
         input_text = input('Captcha: ')
 

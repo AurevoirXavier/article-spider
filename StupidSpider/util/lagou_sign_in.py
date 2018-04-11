@@ -4,6 +4,7 @@ import requests
 from PIL import Image
 from time import time
 from parsel import Selector
+from tempfile import TemporaryFile
 
 from StupidSpider.util.common import md5_encode
 from StupidSpider.util.secret.secret import LAGOU_USERNAME, LAGOU_PASSWORD
@@ -48,11 +49,15 @@ class LagouUser:
         })
 
         if captcha:
-            with open('captcha', 'wb') as f:
+            with TemporaryFile() as f:
                 f.write(
-                    self.session.get(self.__auth_api.format(int(time() * 1000)), headers=self.session.headers).content)
-
-            Image.open('captcha').show()
+                    self.session.get(
+                        self.__auth_api.format(int(time() * 1000)),
+                        headers=self.session.headers
+                    ).content
+                )
+                Image.open(f).show()
+                f.close()
 
             captcha = input('Captcha: ')
 
