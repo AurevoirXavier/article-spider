@@ -4,8 +4,9 @@
 #
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
-
+import scrapy
 from scrapy import signals
+from fake_useragent import UserAgent
 
 
 class StupidspiderSpiderMiddleware(object):
@@ -101,3 +102,20 @@ class StupidspiderDownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+
+class RandomUserAgentMiddleware:
+    def __init__(self, crawler):
+        super(RandomUserAgentMiddleware, self).__init__()
+        self.ua = UserAgent()
+        self.ua_type = crawler.settings.get('RANDOM_UA_TYPE', 'random')
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(crawler)
+
+    def process_request(self, request, spider):
+        def ua():
+            return getattr(self.ua, self.ua_type)
+
+        request.headers.setdefault('User-Agent', ua())

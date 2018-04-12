@@ -26,7 +26,7 @@ class JobboleSpider(scrapy.Spider):
 
         next_url = response.css('.next.page-numbers::attr(href)').extract_first('')
         if next_url:
-            yield Request(url=urljoin(response.url, post_url), callback=self.parse)
+            yield Request(url=urljoin(response.url, next_url), callback=self.parse)
 
     def parse_detail(self, response):
         item_loader = ArticleItemLoader(item=JobboleArticleItem(), response=response)
@@ -35,7 +35,7 @@ class JobboleSpider(scrapy.Spider):
         item_loader.add_css('title', '.entry-header h1::text')
         item_loader.add_css('post_date', '.entry-meta-hide-on-mobile::text')
         item_loader.add_css('category', '.entry-meta-hide-on-mobile a[rel="category tag"]::text')
-        item_loader.add_css('tag', '.entry-meta-hide-on-mobile :not([rel="category tag"])::text')
+        item_loader.add_css('tag', '.entry-meta-hide-on-mobile :not([rel="category tag"]):not([href="#article-comment"])::text')
         item_loader.add_css('content', '.entry')
         item_loader.add_css('votes', '.vote-post-up h10::text')
         item_loader.add_css('bookmarks', '.bookmark-btn::text')

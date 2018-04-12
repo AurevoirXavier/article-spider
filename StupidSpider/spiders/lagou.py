@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 
+from fake_useragent import UserAgent
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 
@@ -14,6 +15,8 @@ class LagouSpider(CrawlSpider):
     allowed_domains = ['www.lagou.com']
     start_urls = ['https://www.lagou.com/']
 
+    __ua = UserAgent()
+
     rules = (
         Rule(LinkExtractor(allow=r'zhaopin/.*'), follow=True),
         Rule(LinkExtractor(allow=r'gongsi/\d+.html'), follow=True),
@@ -26,7 +29,7 @@ class LagouSpider(CrawlSpider):
             'Host': 'www.lagou.com',
             'Origin': 'https://www.lagou.com',
             'Referer': 'https://www.lagou.com/',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1 Safari/605.1.15',
+            'User-agent': __ua.random,
             'Connection': 'keep-alive',
             'Cookie': LAGOU_COOKIES
         }
@@ -41,7 +44,7 @@ class LagouSpider(CrawlSpider):
         item_loader.add_css('experience', '.job_request p>:nth-child(3)::text')
         item_loader.add_css('degree_require', '.job_request p>:nth-child(4)::text')
         item_loader.add_css('type', '.job_request p>:nth-child(5)::text')
-        item_loader.add_css('label','.position-label li::text')
+        item_loader.add_css('label', '.position-label li::text')
         item_loader.add_css('publish_time', '.publish_time::text')
         item_loader.add_css('advantage', '.job-advantage p::text')
         item_loader.add_css('description', '.job_bt div')

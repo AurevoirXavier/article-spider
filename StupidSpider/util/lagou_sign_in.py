@@ -5,6 +5,7 @@ from PIL import Image
 from time import time
 from parsel import Selector
 from tempfile import TemporaryFile
+from http.cookiejar import LWPCookieJar
 
 from StupidSpider.util.common import md5_encode
 from StupidSpider.util.secret.secret import LAGOU_USERNAME, LAGOU_PASSWORD
@@ -24,26 +25,26 @@ REQUEST_DATA = {
 
 class LagouUser:
     def __init__(self):
-        self.__sign_in_page = SIGN_IN_PAGE
-        self.__sign_in_api = SIGN_IN_API
-        self.__auth_api = AUTH_API
-        self.__request_data = REQUEST_DATA.copy()
-        self.session = requests.session()
-        self.session.headers = HEADERS.copy()
+        self.__session = requests.session()
+        self.__session.headers = HEADERS.copy()
+        self.__session.cookies = LWPCookieJar(filename='./cookie')
 
-    def sign_in(self, captcha=False):
+    def sign_in(self, load_cookie=True, captcha=False):
+        if load_cookie and self._load_cookie():
+            return self.online_status()
+
         tokens = re.finditer(
             r"'([\w|-]+)'",
             Selector(
-                self.session.get(
-                    self.__sign_in_page
+                self.__session.get(
+                    SIGN_IN_PAGE
                 ).text
             ).css('head script:nth-last-child(2)::text').extract_first()
         )
 
-        headers = self.session.headers.copy()
+        headers = self.__session.headers.copy()
         headers.update({
-            'Referer': self.__sign_in_page,
+            'Referer': SIGN_IN_PAGE,
             'X-Anit-Forge-Token': next(tokens).group(1),
             'X-Anit-Forge-Code': next(tokens).group(1)
         })
@@ -51,9 +52,9 @@ class LagouUser:
         if captcha:
             with TemporaryFile() as f:
                 f.write(
-                    self.session.get(
-                        self.__auth_api.format(int(time() * 1000)),
-                        headers=self.session.headers
+                    self.__session.get(
+                        AUTH_API.format(int(time() * 1000)),
+                        headers=self.__session.headers
                     ).content
                 )
                 Image.open(f).show()
@@ -61,30 +62,40 @@ class LagouUser:
 
             captcha = input('Captcha: ')
 
-            self.__request_data.update({
+            REQUEST_DATA.update({
                 'request_form_verifyCode': captcha
             })
 
-        self.__request_data.update({
+        REQUEST_DATA.update({
             'password': md5_encode('veenike' + md5_encode(LAGOU_PASSWORD) + 'veenike')
         })
 
-        debug_online_status = self.session.post(
-            self.__sign_in_api,
+        debug_online_status = self.__session.post(
+            SIGN_IN_API,
             headers=headers,
-            data=self.__request_data
+            data=REQUEST_DATA
         )
 
         if self.online_status():
+            self.__session.cookies.save()
+
             print('Online')
         else:
             self.sign_in(captcha=True)
 
     def online_status(self):
-        return self.session.get(
-            self.__sign_in_page,
+        return print(self.__session.get(
+            SIGN_IN_PAGE,
             allow_redirects=False
-        ).status_code == 302
+        ).status_code == 302)
+
+    def _load_cookie(self):
+        try:
+            self.__session.cookies.load(ignore_discard=True)
+
+            return True
+        except FileNotFoundError:
+            return False
 
 
 user = LagouUser()

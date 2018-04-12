@@ -17,6 +17,14 @@ from StupidSpider.items import ZhihuAnswerItem, ZhihuQuestionItem, ZhihuQuestion
 SIGN_UP_PAGE = 'https://www.zhihu.com/signup'
 SIGN_IN_API = 'https://www.zhihu.com/api/v3/oauth/sign_in'
 AUTH_API = 'https://www.zhihu.com/api/v3/oauth/captcha?lang=en'
+ANSWER_API = 'https://www.zhihu.com/api/v4/questions/{0}/answers?sort_by=default&include=data%5B%2A%5D' \
+             '.is_normal%2Cadmin_closed_comment%2Creward_info%2Cis_collapsed%2Cannotation_action' \
+             '%2Cannotation_detail%2Ccollapse_reason%2Cis_sticky%2Ccollapsed_by%2Csuggest_edit%2Ccomment_count' \
+             '%2Ccan_comment%2Ccontent%2Ceditable_content%2Cvoteup_count%2Creshipment_settings' \
+             '%2Ccomment_permission%2Ccreated_time%2Cupdated_time%2Creview_info%2Crelevant_info%2Cquestion' \
+             '%2Cexcerpt%2Crelationship.is_authorized%2Cis_author%2Cvoting%2Cis_thanked%2Cis_nothelp' \
+             '%2Cupvoted_followees%3Bdata%5B%2A%5D.mark_infos%5B%2A%5D.url%3Bdata%5B%2A%5D.author.follower_count' \
+             '%2Cbadge%5B%3F%28type%3Dbest_answerer%29%5D.topics&limit={1}&offset={2}'
 HEADERS = {
     'Host': 'www.zhihu.com',
     'Connection': 'keep-alive',
@@ -38,28 +46,13 @@ FORM_DATA = {
 class ZhihuSpider(scrapy.Spider):
     name = 'zhihu'
     allowed_domains = ['www.zhihu.com']
-    start_urls = ['https://www.zhihu.com/question/271706997']
-
-    sign_up_page = SIGN_UP_PAGE
-    sign_in_api = SIGN_IN_API
-    auth_api = AUTH_API
-    headers = HEADERS.copy()
-    form_data = FORM_DATA.copy()
-
-    answer_api = 'https://www.zhihu.com/api/v4/questions/{0}/answers?sort_by=default&include=data%5B%2A%5D' \
-                 '.is_normal%2Cadmin_closed_comment%2Creward_info%2Cis_collapsed%2Cannotation_action' \
-                 '%2Cannotation_detail%2Ccollapse_reason%2Cis_sticky%2Ccollapsed_by%2Csuggest_edit%2Ccomment_count' \
-                 '%2Ccan_comment%2Ccontent%2Ceditable_content%2Cvoteup_count%2Creshipment_settings' \
-                 '%2Ccomment_permission%2Ccreated_time%2Cupdated_time%2Creview_info%2Crelevant_info%2Cquestion' \
-                 '%2Cexcerpt%2Crelationship.is_authorized%2Cis_author%2Cvoting%2Cis_thanked%2Cis_nothelp' \
-                 '%2Cupvoted_followees%3Bdata%5B%2A%5D.mark_infos%5B%2A%5D.url%3Bdata%5B%2A%5D.author.follower_count' \
-                 '%2Cbadge%5B%3F%28type%3Dbest_answerer%29%5D.topics&limit={1}&offset={2}'
+    start_urls = ['https://www.zhihu.com/']
 
     def start_requests(self):
-        return [Request(self.sign_up_page, headers=self.headers, callback=self._sign_in)]
+        return [Request(SIGN_UP_PAGE, headers=HEADERS, callback=self._sign_in)]
 
     def _sign_in(self, response):
-        headers = self.headers.copy()
+        headers = HEADERS.copy()
         headers.update({
             'authorization': 'oauth c3cef7c66a1843f8b3a9e6a1e3160e20',
             'X-Xsrftoken': re.match(
@@ -69,22 +62,22 @@ class ZhihuSpider(scrapy.Spider):
         })
 
         timestamp = str(int(time() * 1000))
-        self.form_data.update({
+        FORM_DATA.update({
             'timestamp': timestamp,
             'signature': hmac_encode(
-                self.form_data['grant_type'],
-                self.form_data['client_id'],
-                self.form_data['source'],
+                FORM_DATA['grant_type'],
+                FORM_DATA['client_id'],
+                FORM_DATA['source'],
                 timestamp
             )
         })
 
         yield Request(
-            self.auth_api,
+            AUTH_API,
             headers=headers,
             meta={
                 'headers': headers,
-                'form_data': self.form_data
+                'form_data': FORM_DATA
             },
             callback=self._auth
         )
@@ -94,7 +87,7 @@ class ZhihuSpider(scrapy.Spider):
 
         if re.search(r'true', response.text):
             yield Request(
-                self.auth_api,
+                AUTH_API,
                 method='PUT',
                 headers=headers,
                 meta={
@@ -105,7 +98,7 @@ class ZhihuSpider(scrapy.Spider):
             )
         else:
             yield FormRequest(
-                url=self.sign_in_api,
+                url=SIGN_IN_API,
                 headers=headers,
                 formdata=response.meta.get('form_data'),
                 callback=self._online_status
@@ -132,7 +125,7 @@ class ZhihuSpider(scrapy.Spider):
         })
 
         yield FormRequest(
-            url=self.auth_api,
+            url=AUTH_API,
             headers=headers,
             formdata={
                 'input_text': input_text
@@ -146,7 +139,7 @@ class ZhihuSpider(scrapy.Spider):
 
     def _auth_with_captcha(self, response):
         yield FormRequest(
-            url=self.sign_in_api,
+            url=SIGN_IN_API,
             headers=response.meta.get('headers'),
             formdata=response.meta.get('form_data'),
             callback=self._online_status
@@ -155,7 +148,7 @@ class ZhihuSpider(scrapy.Spider):
     def _online_status(self, response):
         if response.status == 201:
             for url in self.start_urls:
-                yield Request(url, headers=self.headers, dont_filter=True)
+                yield Request(url, headers=HEADERS, dont_filter=True)
 
     def parse(self, response):
         all_urls = [
@@ -168,11 +161,11 @@ class ZhihuSpider(scrapy.Spider):
             if re_match:
                 yield Request(
                     re_match.group(1),
-                    headers=self.headers,
+                    headers=HEADERS,
                     callback=self.parse_question
                 )
             else:
-                yield Request(url, headers=self.headers, callback=self.parse)
+                yield Request(url, headers=HEADERS, callback=self.parse)
 
     def parse_question(self, response):
         question_id = re.match(
@@ -192,8 +185,8 @@ class ZhihuSpider(scrapy.Spider):
         zhihu_question_item_loader.add_value('crawl_time', now())
 
         yield Request(
-            self.answer_api.format(question_id, 20, 0),
-            headers=self.headers,
+            ANSWER_API.format(question_id, 20, 0),
+            headers=HEADERS,
             meta={
                 'loader': zhihu_question_item_loader
             },
@@ -228,7 +221,7 @@ class ZhihuSpider(scrapy.Spider):
             else:
                 yield Request(
                     loader._values['url'][0] + '/log',
-                    headers=self.headers,
+                    headers=HEADERS,
                     meta={
                         'loader': loader.load_item()
                     },
@@ -253,7 +246,7 @@ class ZhihuSpider(scrapy.Spider):
         if not answer_json['paging']['is_end']:
             yield Request(
                 answer_json['paging']['next'],
-                headers=self.headers,
+                headers=HEADERS,
                 callback=self.parse_answer
             )
 

@@ -12,6 +12,7 @@ from StupidSpider.util.common import hmac_encode
 
 SIGN_UP_PAGE = 'https://www.zhihu.com/signup'
 SIGN_IN_API = 'https://www.zhihu.com/api/v3/oauth/sign_in'
+AUTH_ADDRESS = 'https://www.zhihu.com/api/v3/oauth/captcha?lang=en'
 MULTIPART_FORM = {
     'client_id': 'c3cef7c66a1843f8b3a9e6a1e3160e20',
     'grant_type': 'password',
@@ -31,18 +32,15 @@ HEADERS = {
 
 class ZhihuUser:
     def __init__(self):
-        self.__sign_up_page = SIGN_UP_PAGE
-        self.__sign_in_api = SIGN_IN_API
-        self.__multipart_form = MULTIPART_FORM.copy()
         self.__session = requests.session()
-        self.__session.headers = HEADERS.copy()
+        self.__session.headers = HEADERS
         self.__session.cookies = LWPCookieJar(filename='./cookie')
 
     def sign_in(self, username, password, load_cookie=True):
         if load_cookie and self._load_cookie():
             return self.online_status()
 
-        headers = self.__session.headers.copy()
+        headers = HEADERS.copy()
         timestamp = str(int(time() * 1000))
 
         headers.update({
@@ -52,24 +50,24 @@ class ZhihuUser:
             'Accept-Language': 'en-us',
             'DNT': '1',
             'authorization': 'oauth c3cef7c66a1843f8b3a9e6a1e3160e20',
-            'X-Xsrftoken': self.__session.get(self.__sign_up_page).cookies.get('_xsrf')
+            'X-Xsrftoken': self.__session.get(SIGN_UP_PAGE).cookies.get('_xsrf')
         })
 
-        self.__multipart_form.update({
+        MULTIPART_FORM.update({
             'username': username,
             'password': password,
             'timestamp': timestamp,
             'signature': hmac_encode(
-                self.__multipart_form['grant_type'],
-                self.__multipart_form['client_id'],
-                self.__multipart_form['source'],
+                MULTIPART_FORM['grant_type'],
+                MULTIPART_FORM['client_id'],
+                MULTIPART_FORM['source'],
                 timestamp
             ),
             'captcha': self._get_captcha(headers)
         })
         self.__session.post(
-            self.__sign_in_api,
-            data=self.__multipart_form,
+            SIGN_IN_API,
+            data=MULTIPART_FORM,
             headers=headers
         )
 
@@ -84,17 +82,16 @@ class ZhihuUser:
             return False
 
     def _get_captcha(self, headers):
-        auth_address = 'https://www.zhihu.com/api/v3/oauth/captcha?lang=en'
         captcha = re.search(
             r'true',
             self.__session.get(
-                auth_address,
+                AUTH_ADDRESS,
                 headers=headers
             ).text
         )
 
         if captcha:
-            auth = self.__session.put(auth_address, headers=headers)
+            auth = self.__session.put(AUTH_ADDRESS, headers=headers)
             base64_img = re.findall(
                 r'"img_base64":"(.+)"',
                 auth.text,
@@ -109,7 +106,7 @@ class ZhihuUser:
             input_text = input('Captcha: ')
 
             self.__session.post(
-                auth_address,
+                AUTH_ADDRESS,
                 data={
                     'input_text': input_text
                 },
@@ -121,7 +118,7 @@ class ZhihuUser:
 
     def online_status(self):
         if self.__session.get(
-                self.__sign_up_page,
+                SIGN_UP_PAGE,
                 allow_redirects=False
         ).status_code == 302:
             self.__session.cookies.save()

@@ -29,13 +29,16 @@ class JobboleArticleItem(scrapy.Item):
     url = scrapy.Field()
     title = scrapy.Field()
     post_date = scrapy.Field(output_processor=Compose(
-        lambda text: datetime.strptime(re.sub(r'[ \r\n·]', '', text[0]), '%Y/%m/%d')
+        lambda text: datetime.strptime(
+            re.sub(
+                r'[ \r\n·]',
+                '', text[0]
+            ),
+            '%Y/%m/%d'
+        )
     ))
     category = scrapy.Field()
-    tag = scrapy.Field(
-        input_processor=MapCompose(lambda text: None if '评论' in text else text),
-        output_processor=Join(',')
-    )
+    tag = scrapy.Field(output_processor=Join(','))
     content = scrapy.Field()
     votes = scrapy.Field(input_processor=MapCompose(int))
     bookmarks = scrapy.Field(input_processor=MapCompose(jobbole_dot_eliminator))
@@ -70,11 +73,11 @@ class JobboleArticleItem(scrapy.Item):
             self['title'],
             self['post_date'],
             self['category'],
-            self['tag'],
+            self.get('tag', ''),
             self['content'],
-            self['votes'],
-            self['bookmarks'],
-            self['comments']
+            self.get('votes', 0),
+            self.get('bookmarks', 0),
+            self.get('comments', 0)
         )
 
         return insert_sql, params
