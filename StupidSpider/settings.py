@@ -56,10 +56,10 @@ ROBOTSTXT_OBEY = False
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 # DOWNLOADER_MIDDLEWARES = {
-#     'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
-#     'StupidSpider.middlewares.RandomUserAgentMiddleware': 543,
+    # 'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
+    # 'StupidSpider.middlewares.RandomUserAgentMiddleware': 543,
 # }
-#
+
 # RANDOM_UA_TYPE = 'random'
 
 # Enable or disable extensions

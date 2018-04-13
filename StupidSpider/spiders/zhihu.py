@@ -6,12 +6,13 @@ import base64
 
 from time import time
 from PIL import Image
+from requests import get
 from random import randint
 from urllib.parse import urljoin
 from tempfile import TemporaryFile
 from scrapy import Request, FormRequest
 
-from StupidSpider.util.secret.secret import ZHIHU_USERNAME, ZHIHU_PASSWORD
+from StupidSpider.util.secret.secret import ZHIHU_USERNAME, ZHIHU_PASSWORD, PROXY_LIST_API
 from StupidSpider.util.common import hmac_encode, now, format_timestamp, take_first
 from StupidSpider.items import ZhihuAnswerItem, ZhihuQuestionItem, ZhihuQuestionItemLoader
 
@@ -62,6 +63,25 @@ class ZhihuSpider(scrapy.Spider):
     name = 'zhihu'
     allowed_domains = ['www.zhihu.com']
     start_urls = ['https://www.zhihu.com/']
+
+    with open('proxy_list', 'w') as f:
+        f.write(
+            '\n'.join(
+                ['http://' + url for url in get(PROXY_LIST_API).json()]
+            )
+        )
+        f.close()
+
+    custom_settings = {
+        'RETRY_TIMES': 10,
+        'DOWNLOADER_MIDDLEWARES': {
+            'scrapy.downloadermiddlewares.retry.RetryMiddleware': 90,
+            'scrapy_proxies.RandomProxy': 100,
+            'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110
+        },
+        'PROXY_LIST': 'tmpo7ylsus1',
+        'PROXY_MODE': 0,
+    }
 
     def start_requests(self):
         return [Request(SIGN_UP_PAGE, headers=HEADERS, callback=self._sign_in)]
