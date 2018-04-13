@@ -5,6 +5,6 @@ from scrapy.cmdline import execute
 
 # Set project directory, make execute available.
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
-execute(['scrapy', 'crawl', 'jobbole'])
-# execute(['scrapy', 'crawl', 'zhihu'])
+# execute(['scrapy', 'crawl', 'jobbole'])
+execute(['scrapy', 'crawl', 'zhihu'])
 # execute(['scrapy', 'crawl', 'lagou'])
