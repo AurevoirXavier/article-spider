@@ -7,7 +7,6 @@ import base64
 from time import time
 from PIL import Image
 from requests import get
-from random import randint
 from urllib.parse import urljoin
 from tempfile import TemporaryFile
 from scrapy import Request, FormRequest
@@ -16,20 +15,6 @@ from StupidSpider.util.secret.secret import ZHIHU_USERNAME, ZHIHU_PASSWORD, PROX
 from StupidSpider.util.common import hmac_encode, now, format_timestamp, take_first
 from StupidSpider.items import ZhihuAnswerItem, ZhihuQuestionItem, ZhihuQuestionItemLoader
 
-USER_AGENT = [
-    'Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)',
-    'Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)',
-    'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.98 Safari/537.36 LBBROWSER',
-    'Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:57.0) Gecko/20100101 Firefox/57.0',
-    'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0',
-    'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36',
-    'Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)',
-    'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.81 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1 Safari/605.1.15'
-]
 SIGN_UP_PAGE = 'https://www.zhihu.com/signup'
 SIGN_IN_API = 'https://www.zhihu.com/api/v3/oauth/sign_in'
 AUTH_API = 'https://www.zhihu.com/api/v3/oauth/captcha?lang=en'
@@ -80,7 +65,7 @@ class ZhihuSpider(scrapy.Spider):
             'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110
         },
         'PROXY_LIST': 'proxy_list',
-        'PROXY_MODE': 0,
+        'PROXY_MODE': 1
     }
 
     def start_requests(self):
@@ -186,9 +171,6 @@ class ZhihuSpider(scrapy.Spider):
                 yield Request(url, headers=HEADERS, dont_filter=True)
 
     def parse(self, response):
-        HEADERS.update({
-            'User-Agent': USER_AGENT[randint(0, 11)]
-        })
         all_urls = [
             urljoin(response.url, url)
             for url in response.css('a::attr(href)').extract()
