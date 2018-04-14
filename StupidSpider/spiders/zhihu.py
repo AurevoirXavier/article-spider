@@ -79,7 +79,7 @@ class ZhihuSpider(scrapy.Spider):
             'scrapy_proxies.RandomProxy': 100,
             'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110
         },
-        'PROXY_LIST': 'tmpo7ylsus1',
+        'PROXY_LIST': 'proxy_list',
         'PROXY_MODE': 0,
     }
 
