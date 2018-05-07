@@ -65,7 +65,7 @@ class ZhihuSpider(scrapy.Spider):
             'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110
         },
         'PROXY_LIST': 'proxy_list',
-        'PROXY_MODE': 1
+        'PROXY_MODE': 0
     }
 
     def start_requests(self):
